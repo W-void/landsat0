@@ -1,5 +1,9 @@
 # S-Net: Spoon Networks for Cloud Masking of Landsat8 Imagery
 
+## Abstract
+
+With the development of neural network, full convolutional neural network has been applied to remote sensing image cloud detection. However, most of the algorithms do not consider the characteristics of remote sensing image, and there is little innovation and change to the full convolution neural network. In this paper, considering the multi band characteristics of remote sensing image and the influence of complex underlying surface of cloud detection, a simple and effective network, called S-Net, is proposed.
+
 ## 1. Introduction
 
 Since 2011, Landsat8/OLI has been collecting high quality imagery of the earth at least every 16 days. Free and open to the public, with global wall-to-wall coverage of land surfaces at an ecologically meaningful spatial resolution, Landsat imagery is one of the most useful resources for ecological monitoring and wildland management. But harnessing the power of the Landsat archive to detect and describe change on the earth’s surface hinges on researchers’ ability to detect and aggregate clear-sky observations uncontaminated by clouds.
@@ -10,7 +14,7 @@ In the last decade, deep Convolutional Neural Networks (CNN) have revolutionized
 
 However, FCN was originally designed for RGB images. Applying FCN to remote sensing image without any change will cause huge waste of computing resources. And as mentioned before, spectral features are the most essential features of ground objects, and it seems to put the cart before the horse to over emphasize spatial features.
 
-To solve these problems, we propose a scoop convolution network, which is divided into three parts. Firstly, 1 x 1 convolution kernel is used to extract the spectral features of the image; secondly, in order to adapt to the complex underlying surface, variance is used to select the feature map generated in the first step; thirdly, a simple network similar to U-Net is used to extract and predict the spatial features of the ground objects.
+To solve these problems, we propose a spoon convolution network, which is divided into three parts. Firstly, 1 x 1 convolution kernel is used to extract the spectral features of the image; secondly, in order to adapt to the complex underlying surface, variance is used to select the feature map generated in the first step; thirdly, a simple network similar to U-Net is used to extract and predict the spatial features of the ground objects.
 
 ## 2. Materials and Methods
 
