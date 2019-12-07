@@ -6,6 +6,8 @@ import torch.nn as nn
 import cv2
 import gdal
 from gdalconst import *
+from libtiff import TIFF
+
 
 # %%
 def readTif(fileName):
@@ -31,13 +33,14 @@ def getMask(imgIdx, checkPath='./checkpoints/'):
     mask = net(torch.from_numpy(img*2e-5).float())
 
     GT = cv2.imread(maskPath + '%05d'%imgIdx + '.png', 0)
-    return mask[0], GT
+    return img[0], mask[0], GT
 
 
 # %%
 if __name__ == "__main__":
-    mask, GT = getMask(700)
+    img, mask, GT = getMask(700)
     print(mask)
+    cv2.imshow('color', img.transpose(1, 2, 0) * 2e-5)
     cv2.imshow('mask', np.float32(np.where(mask[0]>mask[1], 0, 1)))
     cv2.imshow('GT', np.float32(np.where(GT==3, 1, 0)))
     cv2.waitKey(0)
