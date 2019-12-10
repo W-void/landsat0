@@ -59,14 +59,15 @@ def crop_img(root='D:/Data/BC/'):
     for j, sence in enumerate(sences):
         # print(sence)
         tifs = os.listdir(root + sence)
-        QAtif = [tif for tif in tifs if tif[-7:] == 'BQA.TIF']
         tifs = [os.path.join(root, sence, tif) for tif in tifs if os.path.splitext(tif)[-1] in valid_ext]
+        # tifs = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'BQA', 'mask']
         data = []
         cols = []
         print("start read")
         maskTif = tifs[-1]
-        bandTifs = tifs[:-1]
-        # bandTifs = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'BQA']
+        bandTifs = tifs[:-2]
+        qaTif = tifs[-2]
+        # bandTifs = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']
         print(bandTifs)
         
         # read mask
@@ -75,9 +76,10 @@ def crop_img(root='D:/Data/BC/'):
         M, N = mask.shape
 
         # read QA
-        Tif = TIFF.open(QAtif[0])
+        Tif = TIFF.open(qaTif)
         QA = Tif.read_image()
-        QA = np.where((QA & (3 << 14)) == (3 << 14) | (QA & (3 << 12)) == (3 << 12), 100, 0)
+        QA = np.where((QA & (3 << 14) == (3 << 14)) | (QA & (3 << 12) == (3 << 12)), 100, 0)
+        
         # read bands, 特别耗时
         valid_band = [0, *range(3, 9), 10, 1, 2]
         num_of_bands = len(valid_band)
@@ -115,16 +117,19 @@ def crop_img(root='D:/Data/BC/'):
             mask = np.where(mask == uniq[2], cloud, mask)
 
         iters = 500
+        window_size = 256
         for i in range(iters):
-            window_size = 512
-            x, y = np.random.randint(M*0.25, M*0.75, size=2)
+            while True:
+                x, y = np.random.randint(M, M, size=2)
+                label = mask[x:x+window_size, y:y+window_size]
+                if np.sum(label == 0) == 0:
+                    break
             img = bands[:, x:x+window_size, y:y+window_size]
-            label = mask[x:x+window_size, y:y+window_size]
             qa = QA[x:x+window_size, y:y+window_size]
 
             write_images(img, os.path.join(root, 'image', '%05d.tiff'%(i+iters*j)))
             cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(i+iters*j)), np.uint8(label))
-
+            cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(i+iters*j)), np.uint8(qa))
 
 # %%
 if __name__ == "__main__":
