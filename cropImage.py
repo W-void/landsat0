@@ -120,7 +120,7 @@ def crop_img(root='D:/Data/BC/'):
         window_size = 256
         for i in range(iters):
             while True:
-                x, y = np.random.randint(M, M, size=2)
+                x, y = np.random.randint(0, min(M, N), size=2)
                 label = mask[x:x+window_size, y:y+window_size]
                 if np.sum(label == 0) == 0:
                     break
