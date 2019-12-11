@@ -18,7 +18,7 @@ def train(epo_num=50):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    net = myModel(n_channel=3, n_class=2)
+    net = myModel(n_channel=10, n_class=2)
     net = net.float()
     net = net.to(device)
     # criterion = nn.BCELoss().to(device)
@@ -57,8 +57,8 @@ def train(epo_num=50):
             bag_msk_np =  np.argmin(bag_msk_np, axis=1)
 
             if np.mod(index, 15) == 14:
-                print('epoch {}, {}/{},train loss is {}'.format(epo, index, len(train_dataloader), train_loss/15))
-                train_loss = 0
+                print('epoch {}, {}/{},train loss is {}'.format(epo, index, len(train_dataloader), iter_loss))
+                
                 # # vis.close()
                 # vis.images(output_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction')) 
                 # vis.images(bag_msk_np[:, None, :, :], win='train_label', opts=dict(title='label'))
@@ -113,8 +113,8 @@ def train(epo_num=50):
         
 
         if np.mod(epo, 5) == 0:
-            torch.save(net, './checkpoints/net{}.pt'.format(epo))
-            print('saveing checkpoints/net{}.pt'.format(epo))
+            torch.save(net, './checkpoints2/net{}.pt'.format(epo))
+            print('saveing checkpoints2/net{}.pt'.format(epo))
 
 
 # %%

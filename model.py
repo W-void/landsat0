@@ -14,6 +14,7 @@ class myModel(nn.Module):
             ('ext2', nn.Conv2d(7, 7, kernel_size=1)),
             ('x2', nn.Tanh())
             ]))
+        self.featureSelcet = self.selcet
         self.conv1 = nn.Sequential(OrderedDict([
             ('conv1', nn.Conv2d(3, 8, kernel_size=3, padding=1)),
             ('act1', nn.Sigmoid()),
@@ -35,8 +36,7 @@ class myModel(nn.Module):
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax2d()
 
-    def forward(self, x):
-        x = self.bandExtract(x)
+    def selcet(self, x):
         N, C, W, H = x.shape
         x0 = torch.zeros((N, self.NumOfMaxVar, W, H))
         # print(x.shape)
@@ -45,7 +45,21 @@ class myModel(nn.Module):
             for j, feature in enumerate(img):
                 vari[j] = torch.var(feature.flatten())
             x0[i] = img[torch.argsort(-vari)[:self.NumOfMaxVar], :, :]
+        return x0
 
+    def forward(self, x):
+        x = self.bandExtract(x)
+
+        # N, C, W, H = x.shape
+        # x0 = torch.zeros((N, self.NumOfMaxVar, W, H))
+        # # print(x.shape)
+        # for i, img in enumerate(x):
+        #     vari = torch.zeros((C))
+        #     for j, feature in enumerate(img):
+        #         vari[j] = torch.var(feature.flatten())
+        #     x0[i] = img[torch.argsort(-vari)[:self.NumOfMaxVar], :, :]
+        
+        x0 = self.featureSelcet(x)
         x1 = self.conv1(x0)
         x2 = self.conv2(x1)
 
@@ -56,3 +70,9 @@ class myModel(nn.Module):
         # out = self.softmax(out)
 
         return out
+
+
+if __name__ == "__main__":
+    net = myModel(10, 2)
+    net1 = net.featureSelcet
+    print(net1)

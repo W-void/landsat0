@@ -47,7 +47,7 @@ class BagDataset(Dataset):
         label = cv2.imread(self.maskPath+img_name+'.png', 0) # 灰度图
         # label = label[None, :, :]
         # 调整
-        img = img[1:4]
+        # img = img[1:4]
         label = label > 2
         # label = torch.FloatTensor(label)
         #print(imgB.shape)
