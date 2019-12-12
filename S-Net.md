@@ -37,3 +37,6 @@ In the first part, we only use 1 x 1 convolution kernel, which aim is extract th
 ![img](7.png)
 
 As shown in the figure above, S-Net can fit ground true well.
+
+摘抄：
+Spectral information is the most important characteristic of HSIs and plays the vital role for the classification tasks
