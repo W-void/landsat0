@@ -106,17 +106,9 @@ def crop_img(root='D:/Data/BC/'):
         # del data
 
         print("get bands")
-        uniq = np.unique(mask)
-        fill, shadow, land, cloud = range(4)
-        if len(uniq) >= 4:
-            mask = np.where(mask == uniq[1], shadow, mask)
-            mask = np.where(mask == uniq[2], land, mask)
-            mask = np.where(mask > uniq[2], cloud, mask)
-        if len(uniq) == 3: # 没有云影
-            mask = np.where(mask == uniq[1], land, mask)
-            mask = np.where(mask == uniq[2], cloud, mask)
+        # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]
 
-        iters = 500
+        iters = 400
         window_size = 256
         for i in range(iters):
             while True:

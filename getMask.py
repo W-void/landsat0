@@ -38,13 +38,15 @@ def getMask(imgIdx, checkPath='./checkpoints2/'):
 
 # %%
 if __name__ == "__main__":
-    imgIdx = 231
+    imgIdx = 1678
     img, mask, GT = getMask(imgIdx)
+    print(GT)
     qa = cv2.imread('D:/Data/BC/image_qa/' + '%05d'%imgIdx + '.png', 0)
     # print(mask)
     cv2.imshow('color', img.transpose(1, 2, 0) * 2e-5)
     cv2.imshow('mask', np.float32(np.where(mask[0]>mask[1], 0, 1)))
-    cv2.imshow('GT', np.float32(np.where(GT==3, 1, 0)))
+    # cv2.imshow('GT', np.float32(np.where(GT==3, 1, 0)))
+    cv2.imshow('GT', GT)
     cv2.imshow('QA', np.float32(qa))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
