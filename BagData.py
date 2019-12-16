@@ -48,7 +48,7 @@ class BagDataset(Dataset):
         # label = label[None, :, :]
         # 调整
         # img = img[1:4]
-        label = label > 2
+        label = label > 128
         # label = torch.FloatTensor(label)
         #print(imgB.shape)
         if self.transform:
