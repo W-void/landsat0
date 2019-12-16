@@ -52,7 +52,7 @@ def write_images(bands, path):
     # print("save image success.")
 
 
-def crop_img(root='D:/Data/BC/'):
+def crop_img(root='~/Downloads/BC/'):
     sences = os.listdir(root)
     sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
     valid_ext = ['.tif', '.TIF']
