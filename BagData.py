@@ -56,6 +56,7 @@ class BagDataset(Dataset):
         # print(img.shape, label.shape)
         img = img.float()
         label = torch.tensor(label, dtype=torch.long)
+        # print(label.shape, img.shape)
         return img, label
 
 bag = BagDataset(transform)
