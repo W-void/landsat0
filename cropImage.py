@@ -87,23 +87,10 @@ def crop_img(root='~/Downloads/BC/'):
         for i, band in enumerate(valid_band):
             print(bandTifs[band])
             Tif = TIFF.open(bandTifs[band])
+            # if band == 9:
+            #     bands[i] = cv2.resize(Tif.read_image(), (N, M), interpolation=cv2.INTER_NEAREST)
+            #     continue  
             bands[i] = Tif.read_image()
-
-        # for tif in tifs:
-        #     if os.path.splitext(tif)[-1]  in valid_ext:
-        #         Tif = TIFF.open(os.path.join(root, sence, tif))
-        #         data.append(Tif.read_image())
-        #         cols.append(re.split('[_.]', tif)[1])
-        #         # col = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'BQA', 'fixedmask']
-        # print("get tif")
-        # # convert tif to array 
-        # valid_band = [0, *range(3, 9), 10, 1, 2, -1]
-        # num_of_bands = len(valid_band)
-        # M, N = data[0].shape
-        # bands = np.zeros((num_of_bands, M, N), np.int16)
-        # for i, band in enumerate(valid_band):
-        #     bands[i] = data[band]
-        # del data
 
         print("get bands")
         # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]

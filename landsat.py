@@ -18,7 +18,8 @@ def train(epo_num=50):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    net = myModel(n_channel=10, n_class=2)
+    # net = myModel(n_channel=10, n_class=2)
+    net = torch.load("./checkpoints2/net45.pt")
     net = net.float()
     net = net.to(device)
     # criterion = nn.BCELoss().to(device)
@@ -33,6 +34,8 @@ def train(epo_num=50):
     for epo in range(epo_num):
         
         train_loss = 0
+        all_recall = 0.
+        all_precision = 0.
         net.train()
         for index, (bag, bag_msk) in enumerate(train_dataloader):
             # bag.shape is torch.Size([4, 10, 512, 512])
@@ -50,15 +53,25 @@ def train(epo_num=50):
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
             optimizer.step()
+            
+            # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
+            # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
+            outputData = np.argmax(output.data, 1)
+            correction = (bag_msk * outputData).sum()
+            # print(correction, bag_msk.data.sum())
+            recall = correction.to(torch.float64) / bag_msk.data.sum()
+            precision = correction.to(torch.float64) / outputData.sum()
+            all_recall += recall
+            all_precision += precision
 
-            output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
-            output_np = np.argmin(output_np, axis=1)
-            bag_msk_np = bag_msk.cpu().detach().numpy().copy() # bag_msk_np.shape = (4, 2, 160, 160) 
-            bag_msk_np =  np.argmin(bag_msk_np, axis=1)
+            # output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
+            # output_np = np.argmin(output_np, axis=1)
+            # bag_msk_np = bag_msk.cpu().detach().numpy().copy() # bag_msk_np.shape = (4, 2, 160, 160) 
+            # bag_msk_np =  np.argmin(bag_msk_np, axis=1)
 
             if np.mod(index, 15) == 14:
                 print('epoch {}, {}/{},train loss is {}'.format(epo, index, len(train_dataloader), iter_loss))
-                
+                print('recall: {}, precision: {}'.format(recall, precision))
                 # # vis.close()
                 # vis.images(output_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction')) 
                 # vis.images(bag_msk_np[:, None, :, :], win='train_label', opts=dict(title='label'))
@@ -72,6 +85,8 @@ def train(epo_num=50):
 
         
         test_loss = 0
+        all_recall_test = 0.
+        all_precision_test = 0.
         net.eval()
         with torch.no_grad():
             for index, (bag, bag_msk) in enumerate(test_dataloader):
@@ -81,17 +96,25 @@ def train(epo_num=50):
 
                 optimizer.zero_grad()
                 output = net(bag)
-                output = torch.sigmoid(output) # output.shape is torch.Size([4, 2, 160, 160])
+                # output = torch.sigmoid(output) # output.shape is torch.Size([4, 2, 160, 160])
+                
                 loss = criterion(output, bag_msk)
                 iter_loss = loss.item()
                 print(iter_loss)
                 all_test_iter_loss.append(iter_loss)
                 test_loss += iter_loss
 
-                output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
-                output_np = np.argmin(output_np, axis=1)
-                bag_msk_np = bag_msk.cpu().detach().numpy().copy() # bag_msk_np.shape = (4, 2, 160, 160) 
-                bag_msk_np = np.argmin(bag_msk_np, axis=1)
+                outputData = np.argmax(output.data, 1)
+                correction = (bag_msk * outputData).sum()
+                recall_test = correction.to(torch.float64) / bag_msk.data.sum()
+                precision_test = correction.to(torch.float64) / np.sum(outputData)
+                all_recall_test += recall_test
+                all_precision_test += precision_test
+
+                # output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
+                # output_np = np.argmin(output_np, axis=1)
+                # bag_msk_np = bag_msk.cpu().detach().numpy().copy() # bag_msk_np.shape = (4, 2, 160, 160) 
+                # bag_msk_np = np.argmin(bag_msk_np, axis=1)
         
                 if np.mod(index, 15) == 0:
                     pass
@@ -111,10 +134,12 @@ def train(epo_num=50):
         print('epoch train loss = %f, epoch test loss = %f, %s'
                 %(train_loss/len(train_dataloader), test_loss/len(test_dataloader), time_str))
         
-
+        print('epoch train recall,precision = %f, %f, epoch test lrecall,precisionoss = %f, %f, %s'
+                %(all_recall/len(train_dataloader), all_precision/len(train_dataloader), all_recall_test/len(test_dataloader), all_precision_test/len(test_dataloader), time_str))
+        
         if np.mod(epo, 5) == 0:
-            torch.save(net, './checkpoints2/net{}.pt'.format(epo))
-            print('saveing checkpoints2/net{}.pt'.format(epo))
+            torch.save(net, './checkpoints3/net{}.pt'.format(epo))
+            print('saveing checkpoints3/net{}.pt'.format(epo))
 
 
 # %%
