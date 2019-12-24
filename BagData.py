@@ -6,9 +6,11 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import transforms
 from sklearn.preprocessing import OneHotEncoder
 import cv2
-import gdal
-from gdalconst import *
+from osgeo import gdal
+# from gdalconst import *
 from sklearn.preprocessing import OneHotEncoder
+import multiprocessing  # 解决VSCode对多线程支持不好的问题
+multiprocessing.set_start_method('spawn',True)
 
 
 transform = transforms.Compose([
@@ -36,7 +38,7 @@ class BagDataset(Dataset):
             return
         im_width = dataset.RasterXSize #栅格矩阵的列数
         im_height = dataset.RasterYSize #栅格矩阵的行数
-        im_bands = dataset.RasterCount #波段数
+        # im_bands = dataset.RasterCount #波段数
         im_data = dataset.ReadAsArray(0,0,im_width,im_height)
         return im_data
 
@@ -72,7 +74,7 @@ test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=True, num_worke
 if __name__ =='__main__':
 
     for train_batch in train_dataloader:
-        print(train_batch)
+        print(train_batch[0].shape)
 
     for test_batch in test_dataloader:
-        print(test_batch)
+        print(test_batch[0].shape)
