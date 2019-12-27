@@ -52,9 +52,10 @@ def write_images(bands, path):
     # print("save image success.")
 
 
-def crop_img(root='~/Downloads/BC/'):
+def crop_img(root='../../Data/BC/'):
     sences = os.listdir(root)
-    sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
+    # sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
+    sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
     valid_ext = ['.tif', '.TIF']
     for j, sence in enumerate(sences):
         # print(sence)
@@ -96,6 +97,7 @@ def crop_img(root='~/Downloads/BC/'):
         # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]
 
         iters = 400
+        offset = 2400
         window_size = 256
         for i in range(iters):
             while True:
@@ -106,9 +108,10 @@ def crop_img(root='~/Downloads/BC/'):
             img = bands[:, x:x+window_size, y:y+window_size]
             qa = QA[x:x+window_size, y:y+window_size]
 
-            write_images(img, os.path.join(root, 'image', '%05d.tiff'%(i+iters*j)))
-            cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(i+iters*j)), np.uint8(label))
-            cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(i+iters*j)), np.uint8(qa))
+            num = offset+i+iters*j
+            write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
+            cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
+            cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
 
 # %%
 if __name__ == "__main__":
