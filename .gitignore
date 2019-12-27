@@ -2,3 +2,4 @@
 *.png
 ![0-9].png
 .DS_store
+.vscode/
