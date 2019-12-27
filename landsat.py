@@ -18,8 +18,8 @@ def train(epo_num=50):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # net = myModel(n_channel=10, n_class=2)
-    net = torch.load("./checkpoints2/net45.pt")
+    net = myModel(n_channel=10, n_class=2)
+    # net = torch.load("./checkpoints2/net45.pt")
     net = net.float()
     net = net.to(device)
     # criterion = nn.BCELoss().to(device)
@@ -107,7 +107,7 @@ def train(epo_num=50):
                 outputData = np.argmax(output.data, 1)
                 correction = (bag_msk * outputData).sum()
                 recall_test = correction.to(torch.float64) / bag_msk.data.sum()
-                precision_test = correction.to(torch.float64) / np.sum(outputData)
+                precision_test = correction.to(torch.float64) / outputData.sum()
                 all_recall_test += recall_test
                 all_precision_test += precision_test
 
@@ -117,6 +117,7 @@ def train(epo_num=50):
                 # bag_msk_np = np.argmin(bag_msk_np, axis=1)
         
                 if np.mod(index, 15) == 0:
+                    print('recall: {}, precision: {}'.format(recall_test, precision_test))
                     pass
                     # print(r'Testing... Open http://localhost:8097/ to see test result.')
                     # # vis.close()

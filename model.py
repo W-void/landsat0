@@ -9,10 +9,12 @@ class myModel(nn.Module):
         self.n_class = n_class
         self.NumOfMaxVar = 3
         self.bandExtract = nn.Sequential(OrderedDict([
-            ('ext1', nn.Conv2d(n_channel, 7, kernel_size=1)), # in_channels, out_channels, kernel_size
-            ('x1', nn.Tanh()),
-            ('ext2', nn.Conv2d(7, 7, kernel_size=1)),
-            ('x2', nn.Tanh())
+            ('ext1', nn.Conv2d(n_channel, 16, kernel_size=1)), # in_channels, out_channels, kernel_size
+            ('ext_bn1', nn.BatchNorm2d(16)),
+            ('x1', nn.Sigmoid()),
+            ('ext2', nn.Conv2d(16, 16, kernel_size=1)),
+            ('ext_bn2', nn.BatchNorm2d(16)),
+            ('x2', nn.Sigmoid())
             ]))
         self.featureSelcet = self.selcet
         self.conv1 = nn.Sequential(OrderedDict([
