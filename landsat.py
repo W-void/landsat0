@@ -24,7 +24,7 @@ def train(epo_num=50):
     net = net.to(device)
     # criterion = nn.BCELoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = optim.SGD(net.parameters(), lr=1e-1, momentum=0.7)
+    optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.7)
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -70,8 +70,8 @@ def train(epo_num=50):
             # bag_msk_np =  np.argmin(bag_msk_np, axis=1)
 
             if np.mod(index, 15) == 14:
-                print('epoch {}, {}/{},train loss is {}'.format(epo, index, len(train_dataloader), iter_loss))
-                print('recall: {}, precision: {}'.format(recall, precision))
+                print('epoch {}, {:03d}/{},train loss is {:.2f}'.format(epo, index, len(train_dataloader), iter_loss), end="        ")
+                print('recall: {:.2f}, precision: {:.2f}, f-score: {:.2f}'.format(recall, precision, 2*(recall*precision)/(recall+precision)))
                 # # vis.close()
                 # vis.images(output_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction')) 
                 # vis.images(bag_msk_np[:, None, :, :], win='train_label', opts=dict(title='label'))
@@ -100,7 +100,6 @@ def train(epo_num=50):
                 
                 loss = criterion(output, bag_msk)
                 iter_loss = loss.item()
-                print(iter_loss)
                 all_test_iter_loss.append(iter_loss)
                 test_loss += iter_loss
 
@@ -117,7 +116,8 @@ def train(epo_num=50):
                 # bag_msk_np = np.argmin(bag_msk_np, axis=1)
         
                 if np.mod(index, 15) == 0:
-                    print('recall: {}, precision: {}'.format(recall_test, precision_test))
+                    print("loss: {:.2}".format(iter_loss), end="        ")
+                    print('recall: {:.2}, precision: {:.2}, f-score: {:.2f}'.format(recall_test, precision_test, 2*(recall*precision)/(recall+precision)))
                     pass
                     # print(r'Testing... Open http://localhost:8097/ to see test result.')
                     # # vis.close()

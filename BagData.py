@@ -15,8 +15,10 @@ multiprocessing.set_start_method('spawn',True)
 
 transform = transforms.Compose([
     transforms.ToTensor() # totensor 会改变shape！！！
-
-    # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    , transforms.Normalize(
+        mean=[0.04654*2, 0.04435*2, 0.04013*2, 0.04112*2, 0.04776*2, 0.02371*2, 0.01906*2, 0.0038*2, 0.1909*2, 0.17607*2], 
+        std=[1370*16e-10, 1414*16e-10, 1385*16e-10, 1488*16e-10, 1522*16e-10, 998*16e-10, 821*16e-10, 292*16e-10, 2561*16e-10, 2119*16e-10]
+        )
 ])
 
 class BagDataset(Dataset):
