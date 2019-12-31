@@ -28,13 +28,13 @@ Each large picture is cut into 512 * 512 small pictures, and the ratio of traini
 
 As is shown in the figure below, our model include three parts.
 
-![img](3.png)
+![img](./pic/3.png)
 
 In the first part, we only use 1 x 1 convolution kernel, which aim is extract the spectral features of the target. This step will make our algorithm more efficient. In the second part, variance is used to select the feature map generated in the first part. As is known to all, the diversity of underlying surface will have a great impact on cloud detection. In the training process, the underlying surface of each image is the same, so we hope to select the features of the underlying surface suitable for each image through this step. Because the human eye can recognize the cloud through the color image, we choose the three characteristic images with the largest variance. In the third part, we want to utilize spatial information, a simple net similar to U-Net is used.
 
 ## 3. Experience and Evaluation
 
-![img](7.png)
+![img](./pic/7.png)
 
 As shown in the figure above, S-Net can fit ground true well.
 
