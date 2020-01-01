@@ -51,16 +51,6 @@ class myModel(nn.Module):
 
     def forward(self, x):
         x = self.bandExtract(x)
-
-        # N, C, W, H = x.shape
-        # x0 = torch.zeros((N, self.NumOfMaxVar, W, H))
-        # # print(x.shape)
-        # for i, img in enumerate(x):
-        #     vari = torch.zeros((C))
-        #     for j, feature in enumerate(img):
-        #         vari[j] = torch.var(feature.flatten())
-        #     x0[i] = img[torch.argsort(-vari)[:self.NumOfMaxVar], :, :]
-        
         x0 = self.featureSelcet(x)
         x1 = self.conv1(x0)
         x2 = self.conv2(x1)

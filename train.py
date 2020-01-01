@@ -11,7 +11,7 @@ from BagData import test_dataloader, train_dataloader
 from FCN import FCN8s, FCN16s, FCN32s, FCNs, VGGNet
 
 
-def train(epo_num=50, show_vgg_params=False):
+def train(epo_num=30, show_vgg_params=False):
 
     # vis = visdom.Visdom()
 

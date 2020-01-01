@@ -10,11 +10,11 @@ from datetime import datetime
 import visdom
 
 from BagData import test_dataloader, train_dataloader
-from model import myModel
+from model2 import myModel
 
 
 # %%
-def train(epo_num=50):
+def train(epo_num=30):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -24,6 +24,7 @@ def train(epo_num=50):
     net = net.to(device)
     # criterion = nn.BCELoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
+    # criterion = nn.BCEWithLogitsLoss().to(device)
     optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.7)
 
     all_train_iter_loss = []
@@ -71,7 +72,8 @@ def train(epo_num=50):
 
             if np.mod(index, 15) == 14:
                 print('epoch {}, {:03d}/{},train loss is {:.2f}'.format(epo, index, len(train_dataloader), iter_loss), end="        ")
-                print('recall: {:.2f}, precision: {:.2f}, f-score: {:.2f}'.format(recall, precision, 2*(recall*precision)/(recall+precision)))
+                print('recall: {:.2f}, precision: {:.2f}, f-score: {:.2f}'.format(
+                    recall, precision, 2*(recall*precision)/(recall+precision)))
                 # # vis.close()
                 # vis.images(output_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction')) 
                 # vis.images(bag_msk_np[:, None, :, :], win='train_label', opts=dict(title='label'))
@@ -117,7 +119,8 @@ def train(epo_num=50):
         
                 if np.mod(index, 15) == 0:
                     print("loss: {:.2}".format(iter_loss), end="        ")
-                    print('recall: {:.2}, precision: {:.2}, f-score: {:.2f}'.format(recall_test, precision_test, 2*(recall*precision)/(recall+precision)))
+                    print('recall: {:.2}, precision: {:.2}, f-score: {:.2f}'.format(
+                        recall_test, precision_test, 2*(recall_test*precision_test)/(recall_test+precision_test)))
                     pass
                     # print(r'Testing... Open http://localhost:8097/ to see test result.')
                     # # vis.close()
@@ -135,12 +138,18 @@ def train(epo_num=50):
         print('epoch train loss = %f, epoch test loss = %f, %s'
                 %(train_loss/len(train_dataloader), test_loss/len(test_dataloader), time_str))
         
-        print('epoch train recall,precision = %f, %f, epoch test lrecall,precisionoss = %f, %f, %s'
-                %(all_recall/len(train_dataloader), all_precision/len(train_dataloader), all_recall_test/len(test_dataloader), all_precision_test/len(test_dataloader), time_str))
+        rec, pre = all_recall/len(train_dataloader), all_precision/len(train_dataloader)
+        f1 = 2*rec*pre / (rec+pre)
+        print('epoch train recall, precision, f-score = %.2f, %.2f, %.2f' %(rec, pre, f1))
+
+        rec, pre = all_recall_test/len(test_dataloader), all_precision_test/len(test_dataloader)
+        f1 = 2*rec*pre / (rec+pre)
+        print('epoch test  recall, precision, f-score = %.2f, %.2f, %.2f' %(rec, pre, f1))
+        print('time: %s'%(time_str))
         
         if np.mod(epo, 5) == 0:
-            torch.save(net, './checkpoints3/net{}.pt'.format(epo))
-            print('saveing checkpoints3/net{}.pt'.format(epo))
+            torch.save(net, './checkpoints4/net{}.pt'.format(epo))
+            print('saveing checkpoints4/net{}.pt'.format(epo))
 
 
 # %%

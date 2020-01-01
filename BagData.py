@@ -65,7 +65,7 @@ class BagDataset(Dataset):
 
 bag = BagDataset(transform)
 
-train_size = int(0.9 * len(bag))
+train_size = int(0.8 * len(bag))
 test_size = len(bag) - train_size
 train_dataset, test_dataset = random_split(bag, [train_size, test_size])
 
@@ -74,9 +74,9 @@ test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=True, num_worke
 
 
 if __name__ =='__main__':
+    for i in range(2):
+        for train_batch in train_dataloader:
+            print(train_batch[0].shape)
 
-    for train_batch in train_dataloader:
-        print(train_batch[0].shape)
-
-    for test_batch in test_dataloader:
-        print(test_batch[0].shape)
+        for test_batch in test_dataloader:
+            print(test_batch[0].shape)
