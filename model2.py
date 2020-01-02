@@ -26,7 +26,7 @@ class myModel(nn.Module):
             ('act1_1', nn.Sigmoid()),
             ('conv1_2', nn.Conv2d(32, 32, kernel_size=3, padding=1)),
             ('bn1_2', nn.BatchNorm2d(32)),
-            ('act1_2', nn.Sigmoid()),
+            ('act1_2', nn.Sigmoid())
         ]))
         self.conv2 = nn.Sequential(OrderedDict([
             ('conv2_1', nn.Conv2d(32, 64, kernel_size=3, padding=1)),
@@ -34,7 +34,7 @@ class myModel(nn.Module):
             ('act2_1', nn.Sigmoid()),
             ('conv2_2', nn.Conv2d(64, 64, kernel_size=3, padding=1)),
             ('bn2_2', nn.BatchNorm2d(64)),
-            ('act2_2', nn.Sigmoid()),
+            ('act2_2', nn.Sigmoid())
             ]))
         self.conv3 =  nn.Sequential(OrderedDict([
             ('conv3_1', nn.Conv2d(64, 128, kernel_size=3, padding=1)),
