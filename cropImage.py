@@ -52,11 +52,12 @@ def write_images(bands, path):
     # print("save image success.")
 
 
-def crop_img(root='../../Data/BC/'):
+def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
     sences = os.listdir(root)
     # sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
     sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
     valid_ext = ['.tif', '.TIF']
+    num = 0
     for j, sence in enumerate(sences):
         # print(sence)
         tifs = os.listdir(root + sence)
@@ -65,6 +66,7 @@ def crop_img(root='../../Data/BC/'):
         data = []
         cols = []
         print("start read")
+        tifs.sort()
         maskTif = tifs[-1]
         bandTifs = tifs[:-2]
         qaTif = tifs[-2]
@@ -91,28 +93,45 @@ def crop_img(root='../../Data/BC/'):
             # if band == 9:
             #     bands[i] = cv2.resize(Tif.read_image(), (N, M), interpolation=cv2.INTER_NEAREST)
             #     continue  
+            print(band)
             bands[i] = Tif.read_image()
 
         print("get bands")
         # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]
 
-        iters = 400
-        offset = 2400
-        window_size = 256
-        for i in range(iters):
-            while True:
-                x, y = np.random.randint(0, min(M, N), size=2)
-                label = mask[x:x+window_size, y:y+window_size]
-                if np.sum(label == 0) == 0:
-                    break
-            img = bands[:, x:x+window_size, y:y+window_size]
-            qa = QA[x:x+window_size, y:y+window_size]
+        if crop_method == 'random':
+            iters = 400
+            offset = 2400
+            for i in range(iters):
+                while True:
+                    x, y = np.random.randint(0, min(M, N), size=2)
+                    label = mask[x:x+window_size, y:y+window_size]
+                    if np.sum(label == 0) == 0:
+                        break
+                img = bands[:, x:x+window_size, y:y+window_size]
+                qa = QA[x:x+window_size, y:y+window_size]
 
-            num = offset+i+iters*j
-            write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
-            cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
-            cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
+                num = offset+i+iters*j
+                write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
+                cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
+                cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
+        elif crop_method == 'uniform':
+            maxI, maxJ = M // window_size, N // window_size
+            for idxI in range(maxI):
+                iStart, iEnd = idxI*window_size, (idxI+1)*window_size
+                for idxJ in range(maxJ):
+                    jStart, jEnd = idxJ*window_size, (idxJ+1)*window_size
+                    img = bands[:, iStart:iEnd, jStart:jEnd]
+                    img = np.where(img < 0, 0, img)
+                    # img = np.clip(img, a_min=0, a_max=5000)
+                    label = mask[iStart:iEnd, jStart:jEnd]
+                    qa = QA[iStart:iEnd, jStart:jEnd]
+
+                    write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
+                    cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
+                    cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
+                    num += 1
 
 # %%
 if __name__ == "__main__":
-    crop_img()
+    crop_img(root='/Users/wangshuli/Documents/BC/BC/', crop_method='uniform')

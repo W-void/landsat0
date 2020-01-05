@@ -25,6 +25,8 @@ class BagDataset(Dataset):
 
     def __init__(self, transform=None):
         self.transform = transform
+        # self.imgPath = './VOC2012/image/'
+        # self.maskPath = './VOC2012/label/'
         self.imgPath = './VOC2012/JPEGImages/'
         self.maskPath = './VOC2012/SegmentationClass/'
         self.imgFiles = os.listdir(self.imgPath)

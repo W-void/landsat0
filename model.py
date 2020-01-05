@@ -35,18 +35,22 @@ class myModel(nn.Module):
             ('conv2_2', nn.Conv2d(16, 16, kernel_size=3, padding=1)),
             ('bn2_2', nn.BatchNorm2d(16)),
             ('act2_2', nn.Sigmoid()),
-            ('conv2_3', nn.Conv2d(16, 8, kernel_size=3, padding=1)),
-            ('bn2_3', nn.BatchNorm2d(8)),
+            ('conv2_3', nn.Conv2d(16, 16, kernel_size=3, padding=1)),
+            ('bn2_3', nn.BatchNorm2d(16)),
             ('act2_3', nn.Sigmoid())
             ]))
+        self.conv1d = nn.Conv2d(16, self.NumOfMaxVar, 1)
+        self.sigmoid = nn.Sigmoid()
         self.maxPool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.deconv1 = nn.ConvTranspose2d(8, 8, kernel_size=3, stride=2, padding=1, output_padding=1)
+        # self.deconv1 = nn.ConvTranspose2d(8, 8, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.deconv1 = nn.Conv2d(8+16, 8, kernel_size=3, padding=1)
         self.upsample1 = nn.Upsample(scale_factor=4, mode='bilinear')
-        self.bn1 = nn.BatchNorm2d(16)
-        self.deconv2 = nn.ConvTranspose2d(16, 8, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.bn1 = nn.BatchNorm2d(8)
+        # self.deconv2 = nn.ConvTranspose2d(16, 8, kernel_size=3, stride=2, padding=1, output_padding=1)
+        self.deconv2 = nn.Conv2d(8+3, 3, kernel_size=3, padding=1)
         self.upsample2 = nn.Upsample(scale_factor=2, mode='bilinear')
-        self.bn2 = nn.BatchNorm2d(8)
-        self.conv1k = nn.Conv2d(8+3, n_class, 1)
+        self.bn2 = nn.BatchNorm2d(3)
+        self.conv1k = nn.Conv2d(3, n_class, 1)
         # self.softmax = nn.Softmax(dim=1)
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax2d()
@@ -64,14 +68,17 @@ class myModel(nn.Module):
 
     def forward(self, x):
         x = self.bandExtract(x)
-        x0 = self.featureSelcet(x)
+        # x0 = self.featureSelcet(x)
+        x0 = self.sigmoid(self.conv1d(x))
         x1 = self.conv1(self.maxPool(x0))
         x2 = self.conv2(self.maxPool(x1))
 
-        x2 = self.bn2(self.relu(self.deconv1(x2)))
-        x2 = torch.cat([x1, x2], dim=1)
-        x1 = self.bn2(self.relu(self.deconv2(x2)))
-        x1 = torch.cat([x0, x1], dim=1)
+        # x2 = self.bn2(self.relu(self.deconv1(x2)))
+        x2 = torch.cat([x1, self.upsample2(x2)], dim=1)
+        x1 = self.bn1(self.relu(self.deconv1(x2)))
+        # x1 = self.bn2(self.relu(self.deconv2(x2)))
+        x1 = torch.cat([x0, self.upsample2(x1)], dim=1)
+        x1 = self.bn2(self.relu(self.deconv2(x1)))
         out = self.conv1k(x1)
         # out = self.softmax(out)
 
