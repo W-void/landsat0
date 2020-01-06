@@ -55,8 +55,8 @@ def write_images(bands, path):
 
 def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
     sences = os.listdir(root)
-    # sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
-    sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
+    sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
+    # sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
     valid_ext = ['.tif', '.TIF']
     num = 0
     for j, sence in enumerate(sences):
@@ -69,6 +69,9 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
         print("start read")
         tifs.sort()
         maskTif = tifs[-1]
+        if maskTif[-8:] != 'mask.tif':
+            print('...there is no mask tif')
+            continue
         bandTifs = tifs[:-2]
         qaTif = tifs[-2]
         # bandTifs = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']
