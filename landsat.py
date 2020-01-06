@@ -45,15 +45,19 @@ def train(epo_num=10):
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
 
-            optimizer.zero_grad()
             output = net(bag)
             # output = torch.sigmoid(output) # output.shape is torch.Size([4, 2, 160, 160])
-            loss = criterion(output, bag_msk)
+            regularization_loss = 0
+            for param in model.parameters():
+                regularization_loss += torch.sum(torch.abs(param))
+            loss = criterion(output, bag_msk) + 0.01 * regularization_loss
+            
+            optimizer.zero_grad()
             loss.backward()
+            optimizer.step()
             iter_loss = loss.item()
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
-            optimizer.step()
             
             # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
             # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
