@@ -134,4 +134,4 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
 
 # %%
 if __name__ == "__main__":
-    crop_img(root='/Users/wangshuli/Documents/BC/BC/', crop_method='uniform')
+    crop_img(root='../BC/BC/', crop_method='uniform')
