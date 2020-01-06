@@ -99,6 +99,13 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
         print("get bands")
         # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]
 
+        if  not os.path.exists(os.path.join(root, 'image')):
+            os.makedirs(os.path.join(root, 'image'))
+        if  not os.path.exists(os.path.join(root, 'label')):
+            os.makedirs(os.path.join(root, 'label'))
+        if  not os.path.exists(os.path.join(root, 'image_qa')):
+            os.makedirs(os.path.join(root, 'image_qa'))
+
         if crop_method == 'random':
             iters = 400
             offset = 2400
