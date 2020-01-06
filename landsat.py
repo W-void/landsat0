@@ -14,7 +14,7 @@ from model import myModel
 
 
 # %%
-def train(epo_num=20):
+def train(epo_num=10):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -147,7 +147,7 @@ def train(epo_num=20):
         print('epoch test  recall, precision, f-score = %.2f, %.2f, %.2f' %(rec, pre, f1))
         print('time: %s'%(time_str))
         
-        if np.mod(epo+1, 2) == 0:
+        if np.mod(epo+1, 1) == 0:
             torch.save(net, './checkpoints3/net{}.pt'.format(epo))
             print('saveing checkpoints3/net{}.pt'.format(epo))
 
