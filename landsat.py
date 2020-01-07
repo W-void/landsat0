@@ -58,7 +58,7 @@ def train(epo_num=10):
             iter_loss = loss.item()
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
-            
+           
             # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
             # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
             outputData = np.argmax(output.data, 1)
@@ -157,5 +157,5 @@ def train(epo_num=10):
 
 
 # %%
-if __name__ == "__main__":
+if __name__ == "__main__:
     train()
