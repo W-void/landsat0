@@ -18,8 +18,8 @@ def train(epo_num=10):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    net = myModel(n_channel=10, n_class=2)
-    # net = torch.load("./checkpoints3/net9.pt")
+    # net = myModel(n_channel=10, n_class=2)
+    net = torch.load("./checkpoints3/net3.pt")
     net = net.to(device)
     net = net.float()
     # criterion = nn.BCELoss().to(device)
@@ -48,9 +48,9 @@ def train(epo_num=10):
             output = net(bag)
             # output = torch.sigmoid(output) # output.shape is torch.Size([4, 2, 160, 160])
             regularization_loss = 0
-            for param in model.parameters():
+            for param in net.parameters():
                 regularization_loss += torch.sum(torch.abs(param))
-            loss = criterion(output, bag_msk) + 0.01 * regularization_loss
+            loss = criterion(output, bag_msk) + 0.0001 * regularization_loss
             
             optimizer.zero_grad()
             loss.backward()
@@ -151,9 +151,9 @@ def train(epo_num=10):
         print('epoch test  recall, precision, f-score = %.2f, %.2f, %.2f' %(rec, pre, f1))
         print('time: %s'%(time_str))
         
-        if np.mod(epo+1, 1) == 0:
-            torch.save(net, './checkpoints3/net{}.pt'.format(epo))
-            print('saveing checkpoints3/net{}.pt'.format(epo))
+        # if np.mod(epo+1, 1) == 0:
+        #     torch.save(net, './checkpoints3/net{}.pt'.format(epo))
+        #     print('saveing checkpoints3/net{}.pt'.format(epo))
 
 
 # %%
