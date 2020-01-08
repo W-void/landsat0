@@ -50,7 +50,6 @@ def train(epo_num=10, show_vgg_params=False):
             loss = criterion(output, bag_msk)
             loss.backward()
             iter_loss = loss.item()
-            print(iter_loss)
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
             optimizer.step()
