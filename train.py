@@ -17,8 +17,9 @@ def train(epo_num=10, show_vgg_params=False):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    vgg_model = VGGNet(requires_grad=True, show_params=show_vgg_params)
-    fcn_model = FCNs(pretrained_net=vgg_model, n_class=2)
+    #vgg_model = VGGNet(requires_grad=True, show_params=show_vgg_params)
+    #fcn_model = FCNs(pretrained_net=vgg_model, n_class=2)
+    fcn_model = torch.load('./checkpoints_unet/fcn_model_0.pt')
     fcn_model = fcn_model.to(device)
     fcn_model = fcn_model.float()
     # criterion = nn.BCELoss().to(device)
