@@ -154,9 +154,9 @@ def train(epo_num=10):
         print('epoch test  recall, precision, f-score = %.2f, %.2f, %.2f' %(rec, pre, f1))
         print('time: %s'%(time_str))
         
-        # if np.mod(epo+1, 1) == 0:
-        #     torch.save(net, './checkpoints3/net{}.pt'.format(epo))
-        #     print('saveing checkpoints3/net{}.pt'.format(epo))
+        if np.mod(epo+1, 1) == 0:
+            torch.save(net, './checkpoints_unet/unet_{}.pt'.format(epo))
+            print('saveing checkpoints_unet/unet_{}.pt'.format(epo))
 
 
 # %%
