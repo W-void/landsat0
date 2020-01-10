@@ -156,6 +156,7 @@ def test(epo_num=1):
         rec, pre = (all_recall_test + all_recall)/(len(test_dataloader) + len(train_dataloader)), (all_precision_test + all_precision)/(len(test_dataloader) + len(train_dataloader))
         f1 = 2*rec*pre / (rec+pre)
         print('all  recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
+
         print('time: %s'%(time_str))
         
 
