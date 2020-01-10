@@ -15,14 +15,14 @@ from model import myModel
 from unet import UNet
 
 # %%
-def train(epo_num=10):
+def test(epo_num=1):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    # net = torch.load("./checkpoints3/net3.pt")
-    net = UNet(n_channels=10, n_classes=2)
-    print(net.state_dict().keys())
+    net = torch.load("./checkpoints3/net3.pt")
+    # net = UNet(n_channels=10, n_classes=2)
+    # print(net.state_dict().keys())
     net = net.to(device)
     net = net.float()
     # criterion = nn.BCELoss().to(device)
@@ -32,7 +32,7 @@ def train(epo_num=10):
 
     all_train_iter_loss = []
     all_test_iter_loss = []
-
+    net.eval()
     # start timing
     prev_time = datetime.now()
     for epo in range(epo_num):
@@ -40,7 +40,7 @@ def train(epo_num=10):
         train_loss = 0
         all_recall = 0.
         all_precision = 0.
-        net.train()
+        # net.train()
         for index, (bag, bag_msk) in enumerate(train_dataloader):
             # bag.shape is torch.Size([4, 10, 512, 512])
             # bag_msk.shape is torch.Size([4, 2, 512, 512])
@@ -56,8 +56,8 @@ def train(epo_num=10):
             loss = criterion(output, bag_msk) + 0.0001 * regularization_loss
             
             optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            # loss.backward()
+            # optimizer.step()
             iter_loss = loss.item()
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
@@ -96,7 +96,7 @@ def train(epo_num=10):
         test_loss = 0
         all_recall_test = 0.
         all_precision_test = 0.
-        net.eval()
+        
         with torch.no_grad():
             for index, (bag, bag_msk) in enumerate(test_dataloader):
 
@@ -152,13 +152,13 @@ def train(epo_num=10):
         rec, pre = all_recall_test/len(test_dataloader), all_precision_test/len(test_dataloader)
         f1 = 2*rec*pre / (rec+pre)
         print('epoch test  recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
+
+        rec, pre = (all_recall_test + all_recall)/(len(test_dataloader) + len(train_dataloader)), (all_precision_test + all_precision)/(len(test_dataloader) + len(train_dataloader))
+        f1 = 2*rec*pre / (rec+pre)
+        print('all  recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
         print('time: %s'%(time_str))
         
-        if np.mod(epo+1, 1) == 0:
-            torch.save(net, './checkpoints_unet/unet_{}.pt'.format(epo))
-            print('saveing checkpoints_unet/unet_{}.pt'.format(epo))
-
 
 # %%
 if __name__ == "__main__":
-    train()
+    test()
