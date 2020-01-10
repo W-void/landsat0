@@ -8,6 +8,7 @@ import torch.optim as optim
 import numpy as np
 from datetime import datetime
 import visdom
+from math import isnan
 
 from BagData import test_dataloader, train_dataloader
 from model import myModel
@@ -21,6 +22,8 @@ def test(epo_num=1):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
     net = torch.load("./checkpoints3/net3.pt")
+    total_params = sum(p.numel() for p in net.parameters())
+    print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
     # print(net.state_dict().keys())
     net = net.to(device)
@@ -69,8 +72,10 @@ def test(epo_num=1):
             # print(correction, bag_msk.data.sum())
             recall = correction.to(torch.float64) / bag_msk.data.sum()
             precision = correction.to(torch.float64) / outputData.sum()
-            all_recall += recall
-            all_precision += precision
+            if not isnan(recall):
+                all_recall += recall
+            if not isnan(precision):
+                all_precision += precision
 
             # output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
             # output_np = np.argmin(output_np, axis=1)
@@ -116,8 +121,10 @@ def test(epo_num=1):
                 correction = (bag_msk * outputData).sum()
                 recall_test = correction.to(torch.float64) / bag_msk.data.sum()
                 precision_test = correction.to(torch.float64) / outputData.sum()
-                all_recall_test += recall_test
-                all_precision_test += precision_test
+                if not isnan(recall_test):
+                    all_recall_test += recall_test
+                if not isnan(precision_test):
+                    all_precision_test += precision_test
 
                 # output_np = output.cpu().detach().numpy().copy() # output_np.shape = (4, 2, 160, 160)  
                 # output_np = np.argmin(output_np, axis=1)
