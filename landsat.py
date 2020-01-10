@@ -160,5 +160,5 @@ def train(epo_num=10):
 
 
 # %%
-if __name__ == "__main__:
+if __name__ == "__main__":
     train()
