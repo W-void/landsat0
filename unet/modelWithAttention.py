@@ -13,12 +13,13 @@ class UNetWithAttention(nn.Module):
         self.inc2 = DoubleConv(32, 64, 1)
         self.inc3 = DoubleConv(64, 64, 1)
         self.inc3 = DoubleConv(64, 32, 1)
-        self.inc4 = DoubleConv(32, n_channels, 1)
+        self.inc4 = DoubleConv(32, 16, 1)
         self.down1 = Down(32, 64)
         self.down2 = Down(64, 64)
         self.up1 = Up(128, 32, bilinear)
         self.up2 = Up(64, 16, bilinear)
-        self.outc = OutConv(16, n_channels)
+        self.outc = OutConv(16, n_classes)
+
 
     def forward(self, x):
         x1 = self.inc1(x)
@@ -27,5 +28,5 @@ class UNetWithAttention(nn.Module):
         x3 = self.down2(x2)
         x = self.up1(x3, x2)
         x = self.up2(x, x1)
-        logits = self.outc(x)
-        return logits * x_
+        logits = self.outc(x * x_)
+        return logits
