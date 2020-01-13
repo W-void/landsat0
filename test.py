@@ -21,7 +21,7 @@ def test(epo_num=1):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    net = torch.load("./checkpoints3/net3.pt")
+    net = torch.load("./checkpoints_unet/unet_9.pt")
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
