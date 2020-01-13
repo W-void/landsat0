@@ -20,6 +20,7 @@ class UNetWithAttention(nn.Module):
         self.up2 = Up(64, 16, bilinear)
         self.outc = OutConv(16, n_classes)
 
+
     def forward(self, x):
         x1 = self.inc1(x)
         x_ = self.inc4(self.inc3(self.inc2(x1)))
