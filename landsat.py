@@ -13,6 +13,7 @@ from BagData import test_dataloader, train_dataloader
 from model import myModel
 
 from unet import UNet
+from unet import  UNetWithAttention
 
 # %%
 def train(epo_num=10):
@@ -21,8 +22,10 @@ def train(epo_num=10):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
     # net = torch.load("./checkpoints3/net3.pt")
-    net = UNet(n_channels=10, n_classes=2)
-    print(net.state_dict().keys())
+    net = UNetWithAttention(n_channels=10, n_classes=2)
+    total_params = sum(p.numel() for p in net.parameters())
+    print(total_params)
+    # print(net.state_dict().keys())
     net = net.to(device)
     net = net.float()
     # criterion = nn.BCELoss().to(device)
@@ -155,8 +158,11 @@ def train(epo_num=10):
         print('time: %s'%(time_str))
         
         if np.mod(epo+1, 1) == 0:
-            torch.save(net, './checkpoints_unet/unet_{}.pt'.format(epo))
-            print('saveing checkpoints_unet/unet_{}.pt'.format(epo))
+            savePath = './checkpoints_attention/'
+            if not os.path.exists(savePath):
+                os.makedirs(savePath)
+            torch.save(net, savePath + 'unet_{}.pt'.format(epo))
+            print('saveing ' + savePath + 'unet_{}.pt'.format(epo))
 
 
 # %%
