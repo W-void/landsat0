@@ -9,16 +9,16 @@ class UNetWithAttention(nn.Module):
         self.n_classes = n_classes
         self.bilinear = bilinear
 
-        self.inc1 = Residual(n_channels, 32, 1)
-        self.inc2 = Residual(32, 64, 1)
-        self.inc3 = Residual(64, 64, 1)
-        self.inc3 = Residual(64, 32, 1)
-        self.inc4 = Residual(32, 16, 1)
-        self.down1 = Down(32, 64)
-        self.down2 = Down(64, 64)
-        self.up1 = Up(128, 32, bilinear)
-        self.up2 = Up(64, 16, bilinear)
-        self.outc = OutConv(16, n_classes)
+        self.inc1 = DoubleConv(n_channels, 64, 1)
+        self.inc2 = DoubleConv(64, 128, 1)
+        self.inc3 = DoubleConv(128, 128, 1)
+        self.inc3 = DoubleConv(128, 64, 1)
+        self.inc4 = DoubleConv(64, 32, 1)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 128)
+        self.up1 = Up(256, 64, bilinear)
+        self.up2 = Up(128, 32, bilinear)
+        self.outc = OutConv(32, n_classes)
 
 
     def forward(self, x):
