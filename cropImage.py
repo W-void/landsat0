@@ -136,6 +136,8 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                     img = np.where(img < 0, 0, img)
                     # img = np.clip(img, a_min=0, a_max=5000)
                     label = mask[iStart:iEnd, jStart:jEnd]
+                    if np.sum(label == 0) > 1000:
+                        continue
                     qa = QA[iStart:iEnd, jStart:jEnd]
 
                     write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))

@@ -15,14 +15,19 @@ from model import myModel
 from unet import UNet
 from unet import  UNetWithAttention
 
+def save_grad():
+    def hook(grad):
+        if torch.any(torch.isnan(grad)):
+            print("grad is nan ...")
+    return hook 
 # %%
 def train(epo_num=10):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    # net = torch.load("./checkpoints3/net3.pt")
-    net = UNetWithAttention(n_channels=10, n_classes=2)
+    net = torch.load("./checkpoints_unet/unet_9.pt")
+    # net = UNetWithAttention(n_channels=10, n_classes=2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # print(net.state_dict().keys())
@@ -31,7 +36,7 @@ def train(epo_num=10):
     # criterion = nn.BCELoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
     # criterion = nn.BCEWithLogitsLoss().to(device)
-    optimizer = optim.SGD(net.parameters(), lr=2e-2, momentum=0.7)
+    optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.7)
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -59,6 +64,7 @@ def train(epo_num=10):
             loss = criterion(output, bag_msk) + 0.0001 * regularization_loss
             
             optimizer.zero_grad()
+#            output.register_hook(save_grad())
             loss.backward()
             optimizer.step()
             iter_loss = loss.item()
@@ -161,8 +167,8 @@ def train(epo_num=10):
             savePath = './checkpoints_attention/'
             if not os.path.exists(savePath):
                 os.makedirs(savePath)
-            torch.save(net, savePath + 'unet_{}.pt'.format(epo))
-            print('saveing ' + savePath + 'unet_{}.pt'.format(epo))
+            torch.save(net, savePath + 'unet_attention_{}.pt'.format(epo))
+            print('saveing ' + savePath + 'unet_attention_{}.pt'.format(epo))
 
 
 # %%
