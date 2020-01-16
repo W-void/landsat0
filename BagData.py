@@ -76,7 +76,6 @@ test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_worke
 
 
 if __name__ =='__main__':
-    all_dataloader = DataLoader(bag, batch_size=1, shuffle=False, num_workers=4)
     for i, batch in enumerate(all_dataloader):
         if torch.any(torch.isnan(batch[0])):
             print("NO.{} have nan !!!".format(i))
