@@ -9,6 +9,7 @@ import numpy as np
 from datetime import datetime
 import visdom
 from math import isnan
+import argparse
 
 from BagData import all_dataloader
 from model import myModel
@@ -16,12 +17,12 @@ from model import myModel
 # from unet import UNet
 
 # %%
-def test(epo_num=1):
+def test(modelPath):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    net = torch.load("./checkpoints_unet/fcn_model_0.pt")
+    net = torch.load(modelPath)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
@@ -38,7 +39,7 @@ def test(epo_num=1):
     net.eval()
     # start timing
     prev_time = datetime.now()
-    for epo in range(epo_num):
+    for epo in range(1):
         
         train_loss = 0
         acc = 0.
@@ -78,7 +79,7 @@ def test(epo_num=1):
             # precision = correction.to(torch.float64) / outputData.sum()
             recall = evaluateArray[2] / evaluateArray[0]
             precision = evaluateArray[2] / evaluateArray[1]
-            print("acc : {:4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(acc/(index + 1), recall, precision, 2*(recall*precision)/(recall+precision)))
+            print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(all_dataloader), acc/(index + 1), recall, precision, 2*(recall*precision)/(recall+precision)))
             
 
         cur_time = datetime.now()
@@ -90,4 +91,7 @@ def test(epo_num=1):
 
 # %%
 if __name__ == "__main__":
-    test()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--modelPath', dest='path', type=str, default="./checkpoints_unet/fcn_model_0.pt")
+    args = parser.parse_args()
+    test(args.path)

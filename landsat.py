@@ -16,12 +16,19 @@ from unet import UNet
 from unet import  UNetWithAttention
 
 # %%
+def save_grad():
+    def hook(grad):
+        if torch.any(torch.isnan(grad)):
+            print("grad is nan ...")
+    return hook
+
+# %%
 def train(epo_num=10):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    # net = torch.load("./checkpoints3/net3.pt")
+    # net = torch.load("./checkpoints_attention/unet_5.pt")
     net = UNetWithAttention(n_channels=10, n_classes=2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
@@ -54,11 +61,13 @@ def train(epo_num=10):
             output = net(bag)
             # output = torch.sigmoid(output) # output.shape is torch.Size([4, 2, 160, 160])
             regularization_loss = 0
-            for param in net.parameters():
-                regularization_loss += torch.sum(torch.abs(param))
+            # for param in net.parameters():
+            #     regularization_loss += torch.sum(torch.abs(param))
             loss = criterion(output, bag_msk) + 0.0001 * regularization_loss
             
             optimizer.zero_grad()
+            # output.register_hook(print)
+            # output.register_hook(save_grad())
             loss.backward()
             optimizer.step()
             iter_loss = loss.item()
@@ -161,8 +170,8 @@ def train(epo_num=10):
             savePath = './checkpoints_attention/'
             if not os.path.exists(savePath):
                 os.makedirs(savePath)
-            torch.save(net, savePath + 'unet_{}.pt'.format(epo))
-            print('saveing ' + savePath + 'unet_{}.pt'.format(epo))
+            torch.save(net, savePath + 'unet_{}.pt'.format(6+epo))
+            print('saveing ' + savePath + 'unet_{}.pt'.format(6+epo))
 
 
 # %%
