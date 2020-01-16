@@ -73,10 +73,9 @@ train_dataset, test_dataset = random_split(bag, [train_size, test_size])
 
 train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4)
 test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=True, num_workers=4)
-
+all_dataloader = DataLoader(bag, batch_size=1, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':
-    all_dataloader = DataLoader(bag, batch_size=1, shuffle=False, num_workers=4)
     for i, batch in enumerate(all_dataloader):
         if torch.any(torch.isnan(batch[0])):
             print("NO.{} have nan !!!".format(i))
