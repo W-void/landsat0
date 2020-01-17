@@ -73,7 +73,7 @@ train_dataset, test_dataset = random_split(bag, [train_size, test_size])
 
 train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
 test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_workers=8)
-
+all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':
     for i, batch in enumerate(all_dataloader):
