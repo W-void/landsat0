@@ -15,6 +15,11 @@ from model import myModel
 from unet import UNet
 from unet import  UNetWithAttention
 
+def save_grad():
+    def hook(grad):
+        if torch.any(torch.isnan(grad)):
+            print("grad is nan ...")
+    return hook 
 # %%
 def save_grad():
     def hook(grad):
@@ -28,8 +33,8 @@ def train(epo_num=10):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    # net = torch.load("./checkpoints_attention/unet_5.pt")
-    net = UNetWithAttention(n_channels=10, n_classes=2)
+    net = torch.load("./checkpoints_unet/unet_9.pt")
+    # net = UNetWithAttention(n_channels=10, n_classes=2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # print(net.state_dict().keys())
@@ -73,7 +78,7 @@ def train(epo_num=10):
             iter_loss = loss.item()
             all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
-            
+           
             # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
             # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
             outputData = np.argmax(output.data, 1)
@@ -170,8 +175,9 @@ def train(epo_num=10):
             savePath = './checkpoints_attention/'
             if not os.path.exists(savePath):
                 os.makedirs(savePath)
-            torch.save(net, savePath + 'unet_{}.pt'.format(6+epo))
-            print('saveing ' + savePath + 'unet_{}.pt'.format(6+epo))
+
+            torch.save(net, savePath + 'unet_attention_{}.pt'.format(epo))
+            print('saveing ' + savePath + 'unet_attention_{}.pt'.format(epo))
 
 
 # %%

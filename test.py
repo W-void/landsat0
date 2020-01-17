@@ -22,7 +22,8 @@ def test(modelPath):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    net = torch.load(modelPath)
+#    net = torch.load("./checkpoints_unet/unet_9.pt")
+    net = torch.load("./checkpoints_attention/unet_2.pt")
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
@@ -79,7 +80,8 @@ def test(modelPath):
             # precision = correction.to(torch.float64) / outputData.sum()
             recall = evaluateArray[2] / evaluateArray[0]
             precision = evaluateArray[2] / evaluateArray[1]
-            print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(all_dataloader), acc/(index + 1), recall, precision, 2*(recall*precision)/(recall+precision)))
+
+            print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(all_dataloader), acc/(index + 1)/4, recall, precision, 2*(recall*precision)/(recall+precision)))
             
 
         cur_time = datetime.now()
