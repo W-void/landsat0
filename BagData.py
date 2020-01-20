@@ -36,14 +36,15 @@ class BagDataset(Dataset):
         return len(self.imgFiles)
 
     def readTif(self, fileName):
-        dataset = gdal.Open(fileName)
-        if dataset == None:
-            print(fileName+"文件无法打开")
-            return
-        im_width = dataset.RasterXSize #栅格矩阵的列数
-        im_height = dataset.RasterYSize #栅格矩阵的行数
-        # im_bands = dataset.RasterCount #波段数
-        im_data = dataset.ReadAsArray(0,0,im_width,im_height)
+        # dataset = gdal.Open(fileName)
+        # if dataset == None:
+        #     print(fileName+"文件无法打开")
+        #     return
+        # im_width = dataset.RasterXSize #栅格矩阵的列数
+        # im_height = dataset.RasterYSize #栅格矩阵的行数
+        # # im_bands = dataset.RasterCount #波段数
+        # im_data = dataset.ReadAsArray(0,0,im_width,im_height)
+        im_data = gdal.Open(fileName).ReadAsArray()
         return im_data
 
     def __getitem__(self, idx):

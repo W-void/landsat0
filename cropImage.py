@@ -1,6 +1,7 @@
 # %%
 # -*- coding: utf-8 -*
 import os
+from glob import glob
 import re
 import cv2
 import numpy as np
@@ -71,21 +72,21 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
         maskTif = tifs[-1]
         if maskTif[-8:] != 'mask.tif':
             print('...there is no mask tif')
-            continue
-        bandTifs = tifs[:-2]
-        qaTif = tifs[-2]
+        bandTifs = tifs[:11]
+        qaTif = tifs[11]
         # bandTifs = ['B1', 'B10', 'B11', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']
         print(bandTifs)
         
         # read mask
-        Tif = TIFF.open(maskTif)
-        mask = Tif.read_image()
+        maskImg = glob(root+sence+'/*.img')
+        mask = gdal.Open(maskImg[0]).ReadAsArray()
+        # mask = TIFF.open(maskTif).read_image()
         M, N = mask.shape
 
         # read QA
-        Tif = TIFF.open(qaTif)
-        QA = Tif.read_image()
-        QA = np.where((QA & (3 << 14) == (3 << 14)) | (QA & (3 << 12) == (3 << 12)), 100, 0)
+        qa = TIFF.open(qaTif).read_image()
+        QA = np.where((qa & (3 << 14) == (3 << 14)) | (qa & (3 << 12) == (3 << 12)), 200, 0)
+        QA = np.where((qa & (3 << 14) == (2 << 14)) | (qa & (3 << 12) == (2 << 12)), 100, QA)
         
         # read bands, 特别耗时
         valid_band = [0, *range(3, 9), 10, 1, 2]
@@ -136,7 +137,7 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                     img = np.where(img < 0, 0, img)
                     # img = np.clip(img, a_min=0, a_max=5000)
                     label = mask[iStart:iEnd, jStart:jEnd]
-                    if np.sum(label == 0) > 1000:
+                    if np.sum(label == 0) > 0:
                         continue
                     qa = QA[iStart:iEnd, jStart:jEnd]
 

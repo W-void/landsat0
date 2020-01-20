@@ -81,7 +81,7 @@ def test(modelPath):
             recall = evaluateArray[2] / evaluateArray[0]
             precision = evaluateArray[2] / evaluateArray[1]
 
-            print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(all_dataloader), acc/(index + 1)/4, recall, precision, 2*(recall*precision)/(recall+precision)))
+            print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(all_dataloader), acc/(index + 1)/bag.shape[0], recall, precision, 2*(recall*precision)/(recall+precision)))
             
 
         cur_time = datetime.now()
