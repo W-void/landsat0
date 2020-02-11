@@ -15,11 +15,6 @@ from model import myModel
 from unet import UNet
 from unet import  UNetWithAttention
 
-def save_grad():
-    def hook(grad):
-        if torch.any(torch.isnan(grad)):
-            print("grad is nan ...")
-    return hook 
 # %%
 def save_grad():
     def hook(grad):
@@ -27,23 +22,47 @@ def save_grad():
             print("grad is nan ...")
     return hook
 
+def weights_init(m):
+    classname=m.__class__.__name__
+    if classname.find('Conv') != -1:
+        torch.nn.init.xavier_uniform(m.weight.data)
+        torch.nn.init.xavier_uniform(m.bias.data)
+
+def load_checkpoint(net, net_pretrained=None):
+    if net_pretrained == None:
+        # net.apply(weights_init)
+        return net
+    else:
+        net_dict = net.state_dict()
+        net_pretrained_dict = net_pretrained.state_dict()
+        pretrained_dict = {k: v for k, v in net_pretrained_dict.items() if k in net_dict.keys()}
+        # pretrained_dict.pop('outc.conv.weight')
+        # pretrained_dict.pop('outc.conv.bias')
+        print('Total : {}, update: {}'.format(len(net_pretrained_dict), len(pretrained_dict)))
+        net_dict.update(pretrained_dict)
+        net.load_state_dict(net_dict)
+        print("loaded finished!")
+        return net
+
 # %%
 def train(epo_num=10):
     # vis = visdom.Visdom()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    net = torch.load("./checkpoints_unet/unet_9.pt")
-    # net = UNetWithAttention(n_channels=10, n_classes=2)
+    net_pretrained = None
+    net_pretrained = torch.load("./checkpoints_attention_1/new_unet_attention_1.pt")
+    net = UNetWithAttention(n_channels=10, n_classes=2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
+    net = load_checkpoint(net, net_pretrained)
     # print(net.state_dict().keys())
     net = net.to(device)
     net = net.float()
     # criterion = nn.BCELoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
     # criterion = nn.BCEWithLogitsLoss().to(device)
-    optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.7)
+    optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.9)
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -56,7 +75,7 @@ def train(epo_num=10):
         all_recall = 0.
         all_precision = 0.
         net.train()
-        for index, (bag, bag_msk) in enumerate(train_dataloader):
+        for index, (_, bag, bag_msk) in enumerate(train_dataloader):
             # bag.shape is torch.Size([4, 10, 512, 512])
             # bag_msk.shape is torch.Size([4, 2, 512, 512])
 
@@ -94,28 +113,17 @@ def train(epo_num=10):
             # bag_msk_np = bag_msk.cpu().detach().numpy().copy() # bag_msk_np.shape = (4, 2, 160, 160) 
             # bag_msk_np =  np.argmin(bag_msk_np, axis=1)
 
-            if np.mod(index, 15) == 14:
+            if np.mod(index, 1) == 0:
                 print('epoch {}, {:03d}/{},train loss is {:.4f}'.format(epo, index, len(train_dataloader), iter_loss), end="        ")
                 print('recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}'.format(
                     recall, precision, 2*(recall*precision)/(recall+precision)))
-                # # vis.close()
-                # vis.images(output_np[:, None, :, :], win='train_pred', opts=dict(title='train prediction')) 
-                # vis.images(bag_msk_np[:, None, :, :], win='train_label', opts=dict(title='label'))
-                # vis.line(all_train_iter_loss, win='train_iter_loss',opts=dict(title='train iter loss'))
-
-            # plt.subplot(1, 2, 1) 
-            # plt.imshow(np.squeeze(bag_msk_np[0, ...]), 'gray')
-            # plt.subplot(1, 2, 2) 
-            # plt.imshow(np.squeeze(output_np[0, ...]), 'gray')
-            # plt.pause(0.5)
-
         
         test_loss = 0
         all_recall_test = 0.
         all_precision_test = 0.
         net.eval()
         with torch.no_grad():
-            for index, (bag, bag_msk) in enumerate(test_dataloader):
+            for index, (_, bag, bag_msk) in enumerate(test_dataloader):
 
                 bag = bag.to(device)
                 bag_msk = bag_msk.to(device)
@@ -172,12 +180,12 @@ def train(epo_num=10):
         print('time: %s'%(time_str))
         
         if np.mod(epo+1, 1) == 0:
-            savePath = './checkpoints_attention/'
+            savePath = './checkpoints_attention_1/'
             if not os.path.exists(savePath):
                 os.makedirs(savePath)
 
-            torch.save(net, savePath + 'unet_attention_{}.pt'.format(epo))
-            print('saveing ' + savePath + 'unet_attention_{}.pt'.format(epo))
+            torch.save(net, savePath + 'new_unet_attention_{}.pt'.format(epo))
+            print('saveing ' + savePath + 'new_unet_attention_{}.pt'.format(epo))
 
 
 # %%

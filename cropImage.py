@@ -85,8 +85,8 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
 
         # read QA
         qa = TIFF.open(qaTif).read_image()
-        QA = np.where((qa & (3 << 14) == (3 << 14)) | (qa & (3 << 12) == (3 << 12)), 200, 0)
-        QA = np.where((qa & (3 << 14) == (2 << 14)) | (qa & (3 << 12) == (2 << 12)), 100, QA)
+        QA = np.where((qa & (3 << 14) == (3 << 14)) | (qa & (3 << 12) == (3 << 12)), 255, 128)
+        QA = np.where((qa & (3 << 14) == (2 << 14)) | (qa & (3 << 12) == (2 << 12)), 192, QA)
         
         # read bands, 特别耗时
         valid_band = [0, *range(3, 9), 10, 1, 2]
@@ -141,9 +141,9 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                         continue
                     qa = QA[iStart:iEnd, jStart:jEnd]
 
-                    write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
-                    cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
-                    cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
+                    write_images(img, os.path.join(root, 'image', sence + '_%05d.tiff'%(num)))
+                    cv2.imwrite(os.path.join(root, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
+                    cv2.imwrite(os.path.join(root, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
                     num += 1
 
 # %%

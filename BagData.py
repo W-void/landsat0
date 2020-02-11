@@ -1,5 +1,5 @@
 import os
-
+import re
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset, random_split
@@ -21,40 +21,42 @@ transform = transforms.Compose([
         )
 ])
 
+senceList = ["Barren", "Forest", "Grass/Crops","Shrubland", "Snow/Ice", "Urban", "Water", " Wetlands"]
+f = open('./dataLoad/result.txt', "r")
+lines = f.readlines()
+senceDict = {}
+for i, line in enumerate(lines):
+    senceId = re.split('[./]', line)[-3]
+    senceDict[senceId] = i//12
+
+
 class BagDataset(Dataset):
 
-    def __init__(self, transform=None):
+    def __init__(self, transform=None, grep=-1):
         self.transform = transform
         # self.imgPath = './VOC2012/image/'
         # self.maskPath = './VOC2012/label/'
         self.imgPath = './VOC2012/JPEGImages/'
         self.maskPath = './VOC2012/SegmentationClass/'
         self.imgFiles = os.listdir(self.imgPath)
-        # self.maskFiles = os.listdir(self.maskPath)
+        if grep != -1:
+            self.imgFiles = [i for i in self.imgFiles if ssenceDict[i.split('_')[0]] == grep]
         
     def __len__(self):
         return len(self.imgFiles)
 
     def readTif(self, fileName):
-        # dataset = gdal.Open(fileName)
-        # if dataset == None:
-        #     print(fileName+"文件无法打开")
-        #     return
-        # im_width = dataset.RasterXSize #栅格矩阵的列数
-        # im_height = dataset.RasterYSize #栅格矩阵的行数
-        # # im_bands = dataset.RasterCount #波段数
-        # im_data = dataset.ReadAsArray(0,0,im_width,im_height)
         im_data = gdal.Open(fileName).ReadAsArray()
         return im_data
 
     def __getitem__(self, idx):
-        img_name = '%05d'%idx
-        # print(self.imgPath+img_name+'.tiff'+'\n')
-        img = self.readTif(self.imgPath+img_name+'.tiff')
-        label = cv2.imread(self.maskPath+img_name+'.png', 0) # 灰度图
+        # img_name = '%05d'%idx
+        # img = self.readTif(self.imgPath+img_name+'.tiff')
+        # label = cv2.imread(self.maskPath+img_name+'.png', 0) # 灰度图
+        img = self.readTif(self.imgPath + self.imgFiles[idx])
+        label = cv2.imread(self.maskPath + self.imgFiles[idx][:-4]+'png', 0)
         # label = label[None, :, :]
         # 调整
-        # img = img[1:4]
         label = label > 128
         # label = torch.FloatTensor(label)
         #print(imgB.shape)
@@ -64,11 +66,11 @@ class BagDataset(Dataset):
         img = img.float()
         label = torch.tensor(label, dtype=torch.long)
         # print(label.shape, img.shape)
-        return img, label
+        return self.imgFiles[idx], img, label
 
 bag = BagDataset(transform)
 
-train_size = int(0.8 * len(bag))
+train_size = int(0.6 * len(bag))
 test_size = len(bag) - train_size
 train_dataset, test_dataset = random_split(bag, [train_size, test_size])
 
@@ -77,13 +79,17 @@ test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_worke
 all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':
-    for i, batch in enumerate(all_dataloader):
-        if torch.any(torch.isnan(batch[0])):
-            print("NO.{} have nan !!!".format(i))
+    # for i, batch in enumerate(all_dataloader):
+    #     if torch.any(torch.isnan(batch[0])):
+    #         print("NO.{} have nan !!!".format(i))
 
-    # for i in range(2):
-    #     for train_batch in train_dataloader:
-    #         print(train_batch[0].shape)
+    for i in range(2):
+        for train_batch in train_dataloader:
+            print(train_batch[0])
+            print(train_batch[1].shape)
+            print(train_batch[2].shape)
 
-    #     for test_batch in test_dataloader:
-    #         print(test_batch[0].shape)
+        for test_batch in test_dataloader:
+            print(train_batch[0])
+            print(train_batch[1].shape)
+            print(train_batch[2].shape)
