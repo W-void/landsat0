@@ -32,12 +32,13 @@ for i, line in enumerate(lines):
 
 class BagDataset(Dataset):
 
-    def __init__(self, transform=None, grep=-1):
+    def __init__(self, tr='train', transform=None, grep=-1, needQA=False):
         self.transform = transform
-        # self.imgPath = './VOC2012/image/'
-        # self.maskPath = './VOC2012/label/'
-        self.imgPath = './VOC2012/JPEGImages/'
-        self.maskPath = './VOC2012/SegmentationClass/'
+        self.type = tr
+        self.needQA = needQA
+        self.imgPath = './VOC2012/'+self.type+'/image/'
+        self.maskPath = './VOC2012/'+self.type+'/label/'
+        self.qaPath = './VOC2012/'+self.type+'/image_qa/'
         self.imgFiles = os.listdir(self.imgPath)
         if grep != -1:
             self.imgFiles = [i for i in self.imgFiles if ssenceDict[i.split('_')[0]] == grep]
@@ -55,9 +56,10 @@ class BagDataset(Dataset):
         # label = cv2.imread(self.maskPath+img_name+'.png', 0) # 灰度图
         img = self.readTif(self.imgPath + self.imgFiles[idx])
         label = cv2.imread(self.maskPath + self.imgFiles[idx][:-4]+'png', 0)
-        # label = label[None, :, :]
+        qa = cv2.imread(self.qaPath + self.imgFiles[idx][:-4]+'png', 0)
         # 调整
         label = label > 128
+        qa = qa > 128
         # label = torch.FloatTensor(label)
         #print(imgB.shape)
         if self.transform:
@@ -65,18 +67,22 @@ class BagDataset(Dataset):
         # print(img.shape, label.shape)
         img = img.float()
         label = torch.tensor(label, dtype=torch.long)
-        # print(label.shape, img.shape)
-        return self.imgFiles[idx], img, label
+        qa = torch.tensor(qa, dtype=torch.long)
+        if self.needQA == False:
+            return self.imgFiles[idx], img, label
+        else:
+            return self.imgFiles[idx], img, label, qa
 
-bag = BagDataset(transform)
-
-train_size = int(0.6 * len(bag))
-test_size = len(bag) - train_size
-train_dataset, test_dataset = random_split(bag, [train_size, test_size])
+# bag = BagDataset(transform)
+# train_size = int(0.6 * len(bag))
+# test_size = len(bag) - train_size
+# train_dataset, test_dataset = random_split(bag, [train_size, test_size])
+train_dataset = BagDataset(tr='train', transform=transform)
+test_dataset = BagDataset(tr='val', transform=transform)
 
 train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
 test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_workers=8)
-all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
+# all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':
     # for i, batch in enumerate(all_dataloader):

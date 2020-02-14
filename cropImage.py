@@ -8,6 +8,7 @@ import numpy as np
 from libtiff import TIFF
 import gdal
 from gdalconst import *
+import random
 
 
 # %%
@@ -60,6 +61,15 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
     # sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
     valid_ext = ['.tif', '.TIF']
     num = 0
+    trainOrVal = ['train', 'val']
+    for tr in trainOrVal:
+        if  not os.path.exists(os.path.join(root, tr, 'image')):
+            os.makedirs(os.path.join(root, tr, 'image'))
+        if  not os.path.exists(os.path.join(root, tr, 'label')):
+            os.makedirs(os.path.join(root, tr, 'label'))
+        if  not os.path.exists(os.path.join(root, tr, 'image_qa')):
+            os.makedirs(os.path.join(root, tr, 'image_qa'))
+
     for j, sence in enumerate(sences):
         # print(sence)
         tifs = os.listdir(root + sence)
@@ -104,13 +114,6 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
         print("get bands")
         # fill, shadow, land, thinCloud, cloud = [0, 64, 128, 192, 255]
 
-        if  not os.path.exists(os.path.join(root, 'image')):
-            os.makedirs(os.path.join(root, 'image'))
-        if  not os.path.exists(os.path.join(root, 'label')):
-            os.makedirs(os.path.join(root, 'label'))
-        if  not os.path.exists(os.path.join(root, 'image_qa')):
-            os.makedirs(os.path.join(root, 'image_qa'))
-
         if crop_method == 'random':
             iters = 400
             offset = 2400
@@ -124,9 +127,11 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                 qa = QA[x:x+window_size, y:y+window_size]
 
                 num = offset+i+iters*j
-                write_images(img, os.path.join(root, 'image', '%05d.tiff'%(num)))
-                cv2.imwrite(os.path.join(root, 'label', '%05d.png'%(num)), np.uint8(label))
-                cv2.imwrite(os.path.join(root, 'image_qa', '%05d.png'%(num)), np.uint8(qa))
+                tr =  trainOrVal[random.random() > 0.4]
+                write_images(img, os.path.join(root, tr, 'image', sence + '_%05d.tiff'%(num)))
+                cv2.imwrite(os.path.join(root, tr, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
+                cv2.imwrite(os.path.join(root, tr, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
+
         elif crop_method == 'uniform':
             maxI, maxJ = M // window_size, N // window_size
             for idxI in range(maxI):
@@ -141,9 +146,10 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                         continue
                     qa = QA[iStart:iEnd, jStart:jEnd]
 
-                    write_images(img, os.path.join(root, 'image', sence + '_%05d.tiff'%(num)))
-                    cv2.imwrite(os.path.join(root, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
-                    cv2.imwrite(os.path.join(root, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
+                    tr =  trainOrVal[random.random() > 0.4]
+                    write_images(img, os.path.join(root, tr, 'image', sence + '_%05d.tiff'%(num)))
+                    cv2.imwrite(os.path.join(root, tr, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
+                    cv2.imwrite(os.path.join(root, tr, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
                     num += 1
 
 # %%
