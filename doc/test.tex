@@ -3,7 +3,9 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{geometry}
-\geometry{a4paper,scale=0.7}
+\usepackage{float}
+\usepackage{amsmath}
+\geometry{a4paper,scale=0.75}
 % \usepackage{cjk}
 \newcommand{\upcite}[1]{\textsuperscript{\textsuperscript{\cite{#1}}}}
 \begin{document}
@@ -41,17 +43,18 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
 
 为了对模型进行训练与测试，我们利用已有的全球云和云影验证数据集
 “L8 Biome Cloud Validation Masks”\cite{foga2017cloud_data}，该数据集共有96景图片，包含8个种类的下垫面(including Barren, 
-Forest,Grass/Crops, Shrubland,
- Snow/Ice, Urban, Water, Wetlands，每景图片的标签均是人工标注，可信度较高。每个文件包含.TIF格式的Landsat 8 Level-1数据文件、质量文件和.img（ENVI）格式的真值标签。
+Forest,Grass/Crops, Shrubland, Snow/Ice, Urban, Water, Wetlands。
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[scale=0.4]{../pic/BiomeData.png}
-    \caption{Global distribution of the 96 unique Landsat 8 Cloud Cover Assessment (CCA) scenes, sorted by International Geosphere-Biosphere Programme (IGBP) biome. Twelve scenes were selected for each of the eight biomes.}
+    \includegraphics[scale=0.5]{../pic/BiomeData.png}
+    \caption{Global distribution of the 96 unique Landsat 8 Cloud Cover Assessment (CCA) scenes.}
     \label{fig:label}
 \end{figure}
 
-\begin{table}[ht]
+每景图片的标签均是人工标注，可信度较高。每个文件包含.TIF格式的Landsat 8 Level-1数据文件、质量文件和.img（ENVI）格式的真值标签，人工标志位如表1所示。
+
+\begin{table}[H]
     \centering
     \begin{tabular}{c|ccccc}
     \hline
@@ -65,24 +68,24 @@ Forest,Grass/Crops, Shrubland,
     \caption{L8 Biome 数据人工标注标志位}
     \end{table}
 
-我们将标签简单地分为云与非云两类，将每景L8图像均匀切割为256*256大小的小图，切割时过滤掉带填充值的图片，因此，图像边缘的填充像素并不会出现在训练与测试的步骤中。波段选择了除了全色波段的所有波段，共10个波段，训练集与测试集的比例为6:4。
+根据云量百分比的多少，‘L8 Biome’中96景分为clear, midcloud, cloud三种，每种各占三分之一，云量低于35\%的为clear，云量高于65\%的为cloud，云量介于35\%与65\%之间的为midcloud。本文使用midcloud的所有数据，共32景做实验，每种地物有4景。数据我们将标签简单地分为云与非云两类，将每景L8图像均匀切割为256*256大小的小图，切割时过滤掉带填充值的图片，因此，图像边缘的填充像素并不会出现在训练与测试的步骤中。波段选择了除了全色波段的所有波段，共10个波段，训练集与测试集的比例为6:4。
 
 \subsection{Network Architechture}
 
-我们的模型结构如下图，由三部分构成：
-\begin{figure}[ht]
+我们的模型结构如图2，由三部分构成：
+\begin{figure}[H]
     \centering
-    \includegraphics[scale=0.4]{../pic/my_model.png}
+    \includegraphics[scale=0.5]{../pic/my_model.png}
     \caption{our net architecture.}
     \label{fig:label}
 \end{figure}
 
-我们的模型整体上采用了encoder-decoder结构，与unet相比，主要有一下几方面改变：
+我们的模型整体上采用了encoder-decoder结构，与unet相比，主要有以下几方面改变：
 
 1. 减少了模型层数。unet为了提取全局信息，获得更大的感受野，设计了5层网络，共进行4次下采样，若不考虑3*3的卷积层，最深一层的每个像素包含了原始图片16*16像素大小的空间。我们认为遥感图像云检测应该更侧重局部信息，过深的层数不仅会造成资源的浪费，还会加剧边缘模糊的程度。所以我们将层数设计为3，意味着判断每个像素是否为云仅仅依靠其邻域4*4范围内的像素。
 
-2. 增加直达通道。增加直达通道的目的就是得到高分辨率的云掩膜图，以解决encoder-decoder结构天然的缺陷--在保持边缘细节与考虑全局信息之间存在着的以协调的矛盾。
-由于遥感图像特有的多波段特征，使得直达通道变得可能。若是没有CNN，即不考虑图像的空间信息，对于遥感图像，我们仅仅用alexnet或者vgg这样的网络也是可以对遥感图像进行分类的，方法就是将每个像素单独地看作一个样本。事实上，很多方法就是这样做的，如landsat官方的云掩膜方法\cite{zhu2012object}。
+2. 增加直达通道。直达通道里的所有卷积核的大小均为1*1，因此并不涉及空间信息的提取，专注于提取光谱信息。增加直达通道的目的就是得到高分辨率的云掩膜图，以解决encoder-decoder结构天然的缺陷--在保持边缘细节与考虑全局信息之间存在着的以协调的矛盾。
+由于遥感图像特有的多波段特征，使得直达通道变得可能。若是没有CNN，即不考虑图像的空间信息，对于遥感图像，我们仅仅用alexnet或者vgg这样的网络也是可以对遥感图像进行分类的，方法就是将每个像素单独地看作一个样本。事实上，很多方法就是这样做的，如zhu等人提出的FMask\cite{zhu2012object}。因此，我们的网络具有良好的可替换性，通过将直达通道替换为传统的阈值法，可以将深度学习与传统经验完美地结合起来。
 
 3. 加入局部注意力机制。近年来，有很多研究将attention机制加入到语义分割模型中来。在神经网络中，非线性主要来源于激活函数与池化，attention的引入增加了非线性，一部分人以此来解释attention的有效性。目前大多数网络会在感受野最大的卷积位置增加attention结构，以此来学习全局的有效信息。我们考虑到，在云检测任务中应该更加注重下垫面与局部信息，因此，我们只在decoder的最后一层加入了attention机制。
 
@@ -90,22 +93,55 @@ Forest,Grass/Crops, Shrubland,
 
 \section[]{Experience and Result}
 
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{c|ccccccccc}
-    \hline
-    \hline
-    evaluation& Barren& Forest& Grass/Crops& Shrubland& Snow/Ice& Urban& Water&  Wetlands& total\\
-    \hline
-    acc&	    96.14& 95.99& 94.20 & 94.97& 87.80& 95.32& 94.28& 95.51& 94.27\\
-    recall&     95.71& 96.08& 87.98 & 93.71& 98.98& 96.76& 92.92& 98.34& 95.41\\
-    precision&  97.95& 98.13& 97.17 & 96.87& 78.82& 92.85& 92.25& 93.95& 94.06\\
-    f1&         96.82& 97.10& 92.35 & 95.27& 87.76& 94.76& 92.58& 96.10& 94.73\\
-    \hline
-    \hline
-    \end{tabular}
-    \caption{Evaluation results on the Biome dataset}
-    \end{table}
+为客观评定算法的有效性和优越性，采用准确率，召回率，精确度，$F_1$值对结果进行评估。其中，准确率衡量像素分类正确的概率；召回率衡量属于云的像素中被分类正确的概率；精确度衡量被识别为云的像素中真正是云的概率；$F_1$值是召回率与精确度的调和平均数，常被用于二分类问题，可以有效衡量样本不均衡时检测结果的好坏。四个评价指标分别为：
 
+\begin{equation}
+    R_{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}\label{acc}
+\end{equation}
+\begin{equation}
+    R_{recall} = \frac{TP}{TP + FN}\label{recall}
+\end{equation}
+\begin{equation}
+    R_{precision} = \frac{TP}{TP + FP}\label{precision}
+\end{equation}
+\begin{equation}
+    R_{f1-score} = \frac{2 * R_{recall} * R_{precision}}{R_{recall} + R_{precision}}\label{f1}
+\end{equation}
+其中，TP为真正类（True Positive），即云被判为云；TN为真负类（True Negative），即非云被判为非云；FP为假正类（False Positive），即非云被判为云；FN为假负类（false Negative），云被判为非云。
+
+本文将模型与landsat自带的QA波段、原始的UNet做比较。相比于QA波段，取得了8个百分点的性能提升；相比于原始的UNet，效果十分接近，但是我们的模型参数仅不到UNet的十分之一，更加轻量，具有更大的应用潜力。
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{tabular}{c|cccccccccc}
+        \hline
+        \hline
+        model& evaluation& Barren& Forest& Grass/Crops& Shrubland& Snow/Ice& Urban& Water&  Wetlands& total\\
+        \hline
+        our 
+        &acc   &94.92 &94.55 &94.20 &95.17 &93.96 &94.85 &94.14 &94.40 &94.56\\
+        &rec.  &94.19 &92.82 &88.84 &93.49 &90.77 &96.79 &90.29 &98.75 &93.81\\
+        &prec. &97.47 &99.44 &94.73 &97.21 &94.51 &91.80 &94.56 &91.94 &95.39\\
+        &F1    &95.80 &96.01 &91.69 &95.31 &92.60 &94.23 &92.37 &95.22 &94.60\\
+        \hline
+        QA  
+        &acc   &87.46 &95.20 &85.42 &90.34 &60.97 &83.05 &91.51 &90.78 &86.09\\
+        &rec.  &90.85 &93.87 &68.03 &92.04 &92.21 &96.07 &92.22 &96.37 &91.45\\
+        &prec. &88.99 &99.31 &88.85 &89.83 &51.74 &73.25 &86.97 &88.38 &82.89\\
+        &F1    &89.91 &96.51 &77.05 &90.92 &66.29 &83.13 &89.52 &92.21 &86.96\\
+        \hline
+        UNet
+        &acc   &95.49 &95.73 &94.78 &95.91 &93.28 &94.56 &94.80 &94.30 &94.85\\
+        &rec.  &96.35 &94.48 &89.25 &95.35 &87.97 &96.59 &93.88 &98.86 &94.09\\
+        &prec. &96.32 &99.46 &95.97 &96.82 &95.52 &91.38 &92.94 &91.70 &95.01\\
+        &F1    &96.33 &96.91 &92.49 &96.08 &91.59 &93.91 &93.41 &95.15 &94.48\\
+        \hline
+        \hline
+    \end{tabular}}
+    \caption{Evaluation results on the Biome dataset}
+\end{table}
+
+\section[]{Conclusion}
+本文提出了一种基于encoder-deconder结构改进的新的遥感图像云检测模型。该模型充分利用遥感图像多波段的特点，通过增加直达通道，并引入注意力机制，在保持边缘细节与扩大感受野之间寻找矛盾的解决方法，并在landsat8数据集上达到了94\%的准确率，基本还原了输入影像的细节信息。后续将继续优化直达通道与空间信息提取部分，并尝试深度学习与传统方法结合，以实现更加精确的遥感图像云检测。
 \bibliography{./ref.bib}
 \end{document}

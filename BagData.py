@@ -35,7 +35,7 @@ class BagDataset(Dataset):
     def __init__(self, tr='train', transform=None, grep=-1, needQA=False):
         self.transform = transform
         self.type = tr
-        self.needQA = needQA
+        self.needQA = tr == 'val'
         self.imgPath = './VOC2012/'+self.type+'/image/'
         self.maskPath = './VOC2012/'+self.type+'/label/'
         self.qaPath = './VOC2012/'+self.type+'/image_qa/'
@@ -81,7 +81,7 @@ train_dataset = BagDataset(tr='train', transform=transform)
 test_dataset = BagDataset(tr='val', transform=transform)
 
 train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
-test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_workers=8)
+test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=2)
 # all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':
@@ -99,3 +99,4 @@ if __name__ =='__main__':
             print(train_batch[0])
             print(train_batch[1].shape)
             print(train_batch[2].shape)
+            print(train_batch[3].shape)

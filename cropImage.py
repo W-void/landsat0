@@ -127,7 +127,7 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                 qa = QA[x:x+window_size, y:y+window_size]
 
                 num = offset+i+iters*j
-                tr =  trainOrVal[random.random() > 0.4]
+                tr =  trainOrVal[random.random() < 0.4]
                 write_images(img, os.path.join(root, tr, 'image', sence + '_%05d.tiff'%(num)))
                 cv2.imwrite(os.path.join(root, tr, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
                 cv2.imwrite(os.path.join(root, tr, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
@@ -146,7 +146,7 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
                         continue
                     qa = QA[iStart:iEnd, jStart:jEnd]
 
-                    tr =  trainOrVal[random.random() > 0.4]
+                    tr =  trainOrVal[random.random() < 0.4]
                     write_images(img, os.path.join(root, tr, 'image', sence + '_%05d.tiff'%(num)))
                     cv2.imwrite(os.path.join(root, tr, 'label', sence + '_%05d.png'%(num)), np.uint8(label))
                     cv2.imwrite(os.path.join(root, tr, 'image_qa', sence + '_%05d.png'%(num)), np.uint8(qa))
