@@ -36,6 +36,20 @@ Steve Foga, Pat~L Scaramuzza, Song Guo, Zhe Zhu, Ronald~D Dilley~Jr, Tim
   landsat data products.
 \newblock {\em Remote sensing of environment}, 194:379--390, 2017.
 
+\bibitem{goodwin2013cloud}
+Nicholas~R Goodwin, Lisa~J Collett, Robert~J Denham, Neil Flood, and Daniel
+  Tindall.
+\newblock Cloud and cloud shadow screening across queensland, australia: An
+  automated method for landsat tm/etm+ time series.
+\newblock {\em Remote Sensing of Environment}, 134:50--65, 2013.
+
+\bibitem{irish2006characterization}
+Richard~R Irish, John~L Barker, Samuel~N Goward, and Terry Arvidson.
+\newblock Characterization of the landsat-7 etm+ automated cloud-cover
+  assessment (acca) algorithm.
+\newblock {\em Photogrammetric engineering \& remote sensing},
+  72(10):1179--1188, 2006.
+
 \bibitem{jeppesen2019cloud}
 Jacob~H{\o}xbroe Jeppesen, Rune~Hylsberg Jacobsen, Fadil Inceoglu, and
   Thomas~Skj{\o}deberg Toftegaard.
@@ -43,10 +57,29 @@ Jacob~H{\o}xbroe Jeppesen, Rune~Hylsberg Jacobsen, Fadil Inceoglu, and
   learning.
 \newblock {\em Remote Sensing of Environment}, 229:247--259, 2019.
 
+\bibitem{joyce2009review}
+Karen~E Joyce, Stella~E Belliss, Sergey~V Samsonov, Stephen~J McNeill, and
+  Phil~J Glassey.
+\newblock A review of the status of satellite remote sensing and image
+  processing techniques for mapping natural hazards and disasters.
+\newblock {\em Progress in Physical Geography}, 33(2):183--207, 2009.
+
+\bibitem{ju2008availability}
+Junchang Ju and David~P Roy.
+\newblock The availability of cloud-free landsat etm+ data over the
+  conterminous united states and globally.
+\newblock {\em Remote Sensing of Environment}, 112(3):1196--1211, 2008.
+
 \bibitem{li2018pyramid}
 Hanchao Li, Pengfei Xiong, Jie An, and Lingxue Wang.
 \newblock Pyramid attention network for semantic segmentation.
 \newblock {\em arXiv preprint arXiv:1805.10180}, 2018.
+
+\bibitem{liu2013generation}
+Ronggao Liu and Yang Liu.
+\newblock Generation of new cloud masks from modis land surface reflectance
+  products.
+\newblock {\em Remote Sensing of Environment}, 133:21--37, 2013.
 
 \bibitem{FCN}
 Jonathan Long, Evan Shelhamer, and Trevor Darrell.
@@ -66,10 +99,29 @@ Ozan Oktay, Jo~Schlemper, Loic~Le Folgoc, Matthew Lee, Mattias Heinrich,
 \newblock Attention u-net: Learning where to look for the pancreas.
 \newblock {\em arXiv preprint arXiv:1804.03999}, 2018.
 
+\bibitem{prasad2006crop}
+Anup~K Prasad, Lim Chai, Ramesh~P Singh, and Menas Kafatos.
+\newblock Crop yield estimation model for iowa using remote sensing and surface
+  parameters.
+\newblock {\em International Journal of Applied Earth Observation and
+  Geoinformation}, 8(1):26--33, 2006.
+
 \bibitem{ronneberger2015unet}
 Olaf Ronneberger, Philipp Fischer, and Thomas Brox.
 \newblock U-net: Convolutional networks for biomedical image segmentation,
   2015.
+
+\bibitem{sun2018cloud}
+Lin Sun, Xinyan Liu, Yikun Yang, TingTing Chen, Quan Wang, and Xueying Zhou.
+\newblock A cloud shadow detection method combined with cloud height iteration
+  and spectral analysis for landsat 8 oli data.
+\newblock {\em ISPRS Journal of Photogrammetry and Remote Sensing},
+  138:193--207, 2018.
+
+\bibitem{verbesselt2010detecting}
+Jan Verbesselt, Rob Hyndman, Glenn Newnham, and Darius Culvenor.
+\newblock Detecting trend and seasonal changes in satellite image time series.
+\newblock {\em Remote sensing of Environment}, 114(1):106--115, 2010.
 
 \bibitem{zhang2018context}
 Hang Zhang, Kristin Dana, Jianping Shi, Zhongyue Zhang, Xiaogang Wang, Ambrish
@@ -95,5 +147,12 @@ Zongwei Zhou, Md~Mahfuzur~Rahman Siddiquee, Nima Tajbakhsh, and Jianming Liang.
 Zhe Zhu and Curtis~E Woodcock.
 \newblock Object-based cloud and cloud shadow detection in landsat imagery.
 \newblock {\em Remote sensing of environment}, 118:83--94, 2012.
+
+\bibitem{zhu2014automated}
+Zhe Zhu and Curtis~E Woodcock.
+\newblock Automated cloud, cloud shadow, and snow detection in multitemporal
+  landsat data: An algorithm designed specifically for monitoring land cover
+  change.
+\newblock {\em Remote Sensing of Environment}, 152:217--234, 2014.
 
 \end{thebibliography}
