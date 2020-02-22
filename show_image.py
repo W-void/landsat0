@@ -7,11 +7,7 @@ import torch.nn as nn
 from torchvision import transforms
 import numpy as np
 import argparse
-
 from BagData import test_dataloader
-from model import myModel
-
-# from unet import UNet
 
 # %%
 senceList = ["Barren", "Forest", "Grass/Crops","Shrubland", "Snow/Ice", "Urban", "Water", "Wetlands"]
@@ -57,12 +53,25 @@ def test(modelPath):
             eval(bag_msk, u_outputData)
             eval(bag_msk, m_outputData)
             
-            cv2.imshow('qa', qa[0].float().numpy())
-            cv2.imshow('unet', u_outputData[0].float().numpy())
-            cv2.imshow('my', m_outputData[0].float().numpy())
-            cv2.imshow('mask', bag_msk[0].float().numpy())
-            cv2.imshow("color", np.transpose(bag[0, 1:4].numpy() * 5e-6, (1, 2, 0)))
-            cv2.waitKey(0)
+            qa = qa[0].float().numpy()
+            u_out = u_outputData[0].float().numpy()
+            m_out = m_outputData[0].float().numpy()
+            mask = bag_msk[0].float().numpy()
+            color = np.transpose(bag[0, 1:4].numpy() * 5e-6, (1, 2, 0))
+            cv2.imshow('qa', qa)
+            cv2.imshow('unet', u_out)
+            cv2.imshow('my', m_out)
+            cv2.imshow('mask', mask)
+            cv2.imshow("color", color)
+            k = cv2.waitKey(0)
+            if k == ord('s'):
+                imgName = names[0][:-5]
+                cv2.imwrite('./log/'+imgName+'_color.jpg', color*255)
+                cv2.imwrite('./log/'+imgName+'_qa.jpg', qa*255)
+                cv2.imwrite('./log/'+imgName+'_my.jpg', m_out*255)
+                cv2.imwrite('./log/'+imgName+'_unet.jpg', u_out*255)
+                cv2.imwrite('./log/'+imgName+'_mask.jpg', mask*255)
+                print("saved!")
             cv2.destroyAllWindows()
             # img = to_pil_image(bag[0, 1:4] * 2e-5)
             # img.show()
