@@ -10,7 +10,6 @@ import visdom
 import argparse
 
 from BagData import test_dataloader
-from model import myModel
 
 # from unet import UNet
 
@@ -29,7 +28,7 @@ def read_list(path='./dataLoad/result.txt'):
 def test(modelPath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
-    net = torch.load("./checkpoints_unet/unet_11.pt")
+    net = torch.load("./checkpoints_attention/att_2.pt")
     # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
@@ -49,7 +48,7 @@ def test(modelPath):
     prev_time = datetime.now()
 
     senceDict = read_list()
-    predEvalArray = np.zeros((8, ))
+    predEvalArray = np.zeros((8, 5))
     qaEvalArray = np.zeros((8, 5))
     
     for epo in range(1):
@@ -64,16 +63,16 @@ def test(modelPath):
 
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
-            qa = qa.to(device)
+            # qa = qa.to(device)
             output = net(bag)
             outputData = np.argmax(output.data, 1)
            
             acc, recall, precision = get_acc_recall_precision(evaluateArray, bag_msk.data, outputData)
-            a, r, p = get_acc_recall_precision(qaArray, bag_msk.data, qa.data)
+            # a, r, p = get_acc_recall_precision(qaArray, bag_msk.data, qa.data)
 
             if index % 10 == 0:
                 print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(test_dataloader), acc/(index + 1)/bag.shape[0], recall, precision, 2*(recall*precision)/(recall+precision)))
-                print("qa_mask, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(a/(index + 1)/bag.shape[0], r, p, 2*(r*p)/(r+p)))
+                # print("qa_mask, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(a/(index + 1)/bag.shape[0], r, p, 2*(r*p)/(r+p)))
 
             for idx, name in enumerate(names):
                 senceId = re.split('[_]', name)[0]
@@ -82,9 +81,9 @@ def test(modelPath):
                 y_ = np.argmax(out.data, 0)
                 tmpList = evaluate(y, y_)
                 predEvalArray[senceDict[senceId]] += np.array(tmpList)
-                qa_ = qa[idx].data
-                tmpList = evaluate(y, qa_)
-                qaEvalArray[senceDict[senceId]] += np.array(tmpList)
+                # qa_ = qa[idx].data
+                # tmpList = evaluate(y, qa_)
+                # qaEvalArray[senceDict[senceId]] += np.array(tmpList)
 
         cur_time = datetime.now()
         h, remainder = divmod((cur_time - prev_time).seconds, 3600)
@@ -94,9 +93,9 @@ def test(modelPath):
 
     print(predEvalArray)
     np.save('./log/unetEvalArray.npy', predEvalArray)
-    np.save('./log/qaEvalArray.npy', qaEvalArray)
+    # np.save('./log/qaEvalArray.npy', qaEvalArray)
     showEvaluate(predEvalArray)
-    showEvaluate(qaEvalArray)
+    # showEvaluate(qaEvalArray)
         
 
 def get_acc_recall_precision(arr, y, y_):
