@@ -1,10 +1,11 @@
+import torch.nn.functional as F
 from .unet_parts import *
-from .aspp import ASPP
+from .aspp import *
 
 
-class UNetWithAttention(nn.Module):
+class UNetWithAttAndAspp(nn.Module):
     def __init__(self, n_channels, n_classes):
-        super(UNetWithAttention, self).__init__()
+        super(UNetWithAttAndAspp, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
 
@@ -16,7 +17,8 @@ class UNetWithAttention(nn.Module):
         self.inc4 = DoubleConv(64, 32, 1)
         self.down1 = Down(64, 128)
         # self.down2 = Down(128, 128)
-        self.aspp = ASPP(128, 128)
+        # self.aspp = DoubleAspp(128,  128)
+        self.aspp = SingleAspp(128,  128)
         self.up1 = Up(256, 64)
         self.up2 = Up(128, 32)
         self.Att = Attention_block(F_g=32,F_l=32,F_int=16)

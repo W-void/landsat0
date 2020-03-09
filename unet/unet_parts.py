@@ -73,7 +73,7 @@ class Up(nn.Module):
         super().__init__()
 
         self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-        self.conv1 = nn.Conv2d(in_channels, in_channels//2, 1)
+        # self.conv1 = nn.Conv2d(in_channels, in_channels//2, 1)
         self.conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, x1, x2):

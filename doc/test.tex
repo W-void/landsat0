@@ -36,7 +36,7 @@ Ronggao Liu等\cite{liu2013generation}提出一种从MOD09时间序列产品中�
 
 近年来，深度学习在自然语言处理、降维、图像分类、目标检测、语义分割等方面取得了诸多成果。从AlexNet开始，深度学习开始席卷图像处理领域。一些文章将高分辨率图像切割成一张张小图或超像素，对图片或超像素进行分类，将其分为有云、无云两类或多云、少云、无云三类，但这降低了图像的分辨率。云检测其实是图像分割任务Pixel-level labeling tasks，图像分割可以定义为一种特定的图像处理技术，用于将图像划分为两个或两个以上有意义的区域。对于图像分割任务，输入一副图像，输出也是一副图像。
 
-目前也有很多方法将全卷积网络应用于遥感图像的云检测\cite{chai2019cloud, jeppesen2019cloud}，但很少有人会针对遥感图像多波段的特点对神经网络的结构进行针对性的设计。需要注意的是，这些神经网络模型是针对RGB图像设计的，而直接将为RGB图像设计的网络应用于多光谱遥感图像会有三个问题：1.因为RGB图像只有三个波段，针对RGB图像提出来的算法，空间信息无疑是神经网络提取的重点，这类网络往往通过加深层数以加大感受野，而对于识别大部分地物，尤其是检测云，过于考虑全局信息会对存储与计算造成巨大的浪费；2.感受野的增大往往意味着保持边缘细节能力的减弱，而对于云检测任务来说，我们在意的往往是这些边缘，一味地增加感受野可能会造成适得其反的效果；3.遥感图像有丰富的光谱信息，且光谱特征是地物最本质的特征，我们应该为光谱信息分配更多的计算资源。
+目前也有很多方法将全卷积网络应用于遥感图像的云检测\cite{chai2019cloud, jeppesen2019cloud}，但很少有人会针对遥感图像多波段的特点对神经网络的结构进行针对性的设计。需要注意的是，这些神经网络模型是针对RGB图像设计的，而直接将为RGB图像设计的网络应用于多光谱遥感图像会有三个问题：1.因为RGB图像只有三个波段，针对RGB图像提出来的算法，空间信息无疑是神经网络提取的重点，这类网络往往通过加深层数以加大感受野，而对于识别大部分地物，尤其是检测云，过于考虑全局信息会对存储与计算造成巨大的浪费；2.感受野的增大往往意味着保持边缘细节能力的减弱，而对于云检测任务来说，我们在意的往往是这些边缘，一味地增加感受野可能会造成适得其反的效果，而且现有网络的输出往往过于平滑，相近的像素往往具有相同的预测值，这对于遥感图像碎云的检测极为不利，而碎云的检测正是云检测中的难点；3.遥感图像有丰富的光谱信息，且光谱特征是地物最本质的特征，我们应该为光谱信息分配更多的计算资源。
 
 在这篇文章中，我们基于U-Net，提出了一个新颖的、简单的、有效的网络，主要包括三部分。第一部分，考虑到复杂的下垫面是云检测中的难点，为了更好地处理复杂的下垫面，我们减少了encoder-decoder层数，注重局部空间特征。
 第二部分，光谱特征提取部分，为了充分利用遥感图像多波段的特性，利用多层的1*1卷积核，对原始遥感图像进行波段特征提取，这样也可以保证边缘细节。
@@ -118,7 +118,7 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
 
 需要注意的是，FCN与U-Net都用到了跳层连接，这其实揭示了端到端语义分割的一个主流矛盾：既需要全局的感受野来完成分类任务，又需要用局部信息和低层的低级视觉信息来达到准确的边缘分割。为了考虑更多的空间信息，需要获得更大的感受野，因此在重构过程中会产生粗糙的输出，最大池化层的存在则进一步降低了获得精细分割输出的机会。随着卷积神经网络深度的增加，特征图的空间分辨率降低，小目标的信息逐渐丢失。
 
-为了解决这个矛盾，有很多方法对这个结构进行了改进。Shuai Zheng等人\cite{zheng2015conditional}提出了FCN-CRF，利用条件随机场对分割结果进行平滑与优化。Seg-Net\cite{badrinarayanan2015segnet}引入了一种新的上采样方式，叫做反池化，减少了大量参数，提升了计算性能，但准确率一般。Deeplab\cite{chen2014semantic, chen2017deeplab, chen2017rethinking}系列，用resnet作为基模型；利用空洞卷积在不损失分辨率和边缘信息的情况下增大感受野；引入一种类似于金字塔结构的模块--ASPP模块，以检测不同大小的物体。Zhou等人\cite{zhou2018unet++}提出的unet++，丰富了decoder结构，在每一层都加入了decoder，使用了浅层和深层的特征。也有将注意力机制应用于图像分割的方法\cite{zhang2018context, li2018pyramid, oktay2018attention}，加权地学习全局信息，并保证局部信息。
+为了解决这个矛盾，有很多方法对这个结构进行了改进。Shuai Zheng等人\cite{zheng2015conditional}提出了FCN-CRF，利用条件随机场对分割结果进行平滑与优化。Seg-Net\cite{badrinarayanan2015segnet}引入了一种新的上采样方式，叫做反池化，减少了大量参数，提升了计算性能，但准确率一般。Deeplab\cite{chen2014semantic, chen2017deeplab, chen2017rethinking}系列，用resnet作为基模型；利用空洞卷积在不损失分辨率和边缘信息的情况下增大感受野；引入一种类似于金字塔结构的模块--ASPP模块，以检测不同大小的物体，并用空洞卷积替代最后几个下采样层。Zhou等人\cite{zhou2018unet++}提出的unet++，丰富了decoder结构，在每一层都加入了decoder，使用了浅层和深层的特征。也有将注意力机制应用于图像分割的方法\cite{zhang2018context, li2018pyramid, oktay2018attention}，加权地学习全局信息，并保证局部信息。Alex等人\cite{kirillov2019pointrend}将图像分割看作渲染任务，只对最不确定的几个位置进行细分、预测，提出了一个有效保留图像细节的结构。
 
 \subsection{Network Architechture}
 
@@ -126,31 +126,41 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
 我们的模型结构如图\ref{fig_myModel}，可以分为三部分：
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.25]{../pic/model.jpg}
+    \includegraphics[scale=0.2]{../pic/my_model.png}
     \caption{our net architecture.}
     \label{fig_myModel}
 \end{figure}
 
 我们的模型整体上采用了encoder-decoder结构，与unet相比，主要有以下几方面改变：
 
-1. 增加直达通道。直达通道里的所有卷积核的大小均为1*1，因此等价于一个多层的softmax网络。增加直达通道并不涉及空间信息的提取，专注于提取光谱信息,目的就是得到高分辨率的云掩膜图，以解决encoder-decoder结构天然的缺陷--在保持边缘细节与考虑全局信息之间存在着的以协调的矛盾。
+1. 增加直达通道。直达通道里的所有卷积核的大小均为1*1，这其实是一个多层感知机，可以将这一部分理解为一个特殊的跳层链接。增加直达通道并不涉及空间信息的提取，专注于提取光谱信息,目的就是得到高分辨率的云掩膜图，以解决encoder-decoder结构天然的缺陷--在保持边缘细节与考虑全局信息之间存在着的以协调的矛盾。
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.3]{../pic/straight.jpg}
-    \caption[]{Part1. Straight access, 所有的卷积核都是1*1大小的。}
+    \includegraphics[scale=0.25]{../pic/part1.jpg}
+    \caption[]{Part1. Straight access, 所有的卷积核都是1*1大小的，等价于多层感知机。}
     \label{pic:straight}
 \end{figure}
 
-由于遥感图像特有的多波段特征，使得直达通道变得可能。若是不考虑图像的空间信息，对于遥感图像，我们使用决策树或者SVM也是可以对遥感图像的单个像素进行分类的，方法就是将每个像素单独地看作一个样本。事实上，很多方法就是这样做的，如zhu等人提出的FMask\cite{zhu2012object}。因此，我们的网络也具有良好的可替换性，通过将直达通道替换为传统的阈值法，可以将深度学习与传统经验完美地结合起来。
+由于遥感图像特有的多波段特征，使得直达通道变得可能，比如构造NDVI这样的特征。若是不考虑图像的空间信息，对于遥感图像，我们使用决策树或者SVM也是可以对遥感图像的单个像素进行分类的，方法就是将每个像素单独地看作一个样本。事实上，很多方法就是这样做的，如zhu等人提出的FMask\cite{zhu2012object}。因此，我们的网络也具有良好的可替换性，通过将直达通道替换为传统的阈值法，可以将深度学习与传统经验完美地结合起来。
 
-2. 减少编码解码次数。图\ref{pic:part2}展示了更加清晰的encoder-decoder结构。unet为了提取全局信息，获得更大的感受野，设计了5层网络，共进行4次下采样，若不考虑3*3的卷积层，每一次下采样均由2*2的池化层完成，最深一层的特征图大小为输入图像的十六分之一，每个像素包含了原始图片16*16像素大小的空间。我们认为遥感图像云检测应该更侧重局部信息，过深的层数不仅会造成资源的浪费，还会加剧边缘模糊的程度。所以我们将层数设计为3，意味着判断每个像素是否为云仅仅依靠其邻域4*4范围内的像素。
+2. 减少编码解码次数。图\ref{pic:part2}展示了更加清晰的encoder-decoder结构。unet为了提取全局信息，获得更大的感受野，设计了5层网络，共进行4次下采样，每加深一层，模型参数都会成倍地增加。若不考虑3*3的卷积层，每一次下采样均由2*2的池化层完成，最深一层的特征图大小为输入图像的十六分之一，每个像素包含了原始图片16*16像素大小的空间。我们认为遥感图像云检测应该更侧重局部信息，过深的层数不仅会造成资源的浪费，还会加剧边缘模糊的程度。所以我们将层数设计为3，意味着判断每个像素是否为云仅仅依靠其邻域4*4范围内的像素。
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.3]{../pic/part2.jpg}
-    \caption[]{Part2. 相似于U-Net，减小了模型深度。}
+    \includegraphics[scale=0.25]{../pic/part2.jpg}
+    \caption[]{Part2. 相似于U-Net，减小了模型深度，同时加入了ASPP增加感受野。}
     \label{pic:part2}
+\end{figure}
+
+同时，为了以较小的代价捕获多尺度信息，借鉴deeplab的思想\cite{chen2017deeplab}，引入金字塔型空洞卷积。由池化层获得的感受野信息会造成精度的损失，空洞卷积可以在不增加额外参数与下采样层的前提下提高感受野。
+空洞卷积实际卷积核大小：$K=k+(k-1)(r-1)$，$k$为原始卷积核大小，$r$为空洞卷积参数空洞率。空洞率为1的空洞卷积就是正常的卷积。空洞卷积可以分为串联与并联两种情况，串联的情况比较复杂，我们选择了较为简单的并联结构。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.25]{../pic/aspp.jpg}
+    \caption[]{金字塔形空洞卷积(ASPP). 利用不同空洞率的卷积核收集不同尺度的信息。}
+    \label{pic:aspp}
 \end{figure}
 
 3. 加入注意门控(Attention Gate)。我们利用attention gate将光谱信息与空间信息更加有效地融合起来。近年来，有很多研究将attention机制加入到语义分割模型中来。在神经网络中，非线性主要来源于激活函数与池化，attention的引入增加了非线性，一部分人以此来解释attention的有效性。为了获得足够大的感受野，feature map在CNN中被逐渐下采样。这样，特征与像素间的相对关系可以在一个大的视野中被收集。但是，这对于一些小但具有明显特征的目标并不友好。
@@ -164,18 +174,24 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
     \label{pic:AG}
 \end{figure}
 
-门控系数$\alpha$是长宽与输入特征$f$相同，但通道数为1的单层权重图，$\alpha_i\in[0,1]$。$w:1*1*1$意思是$w:height,weight,out\_channelss$。$w_g$与$w_f$将门控信号$g$和输入特征$f$变为形状完全相同的两个张量，$w$将输入张量变为2维的平面图，最后再由$Sigmoid$函数将实域映射到0-1之间。注意力机制的公式表述如下：
+门控系数$\alpha$是长宽与输入特征$f$相同，但通道数为1的单层权重图，$\alpha_i\in[0,1]$。$w:1*1*1$意思是$w:height,weight,out\_channelss$。$w_g$与$w_f$将门控信号$g$和输入特征$f$变为形状完全相同的两个张量，$w$将输入张量变为2维的平面图，最后再由$Sigmoid$函数将实域映射到0-1之间。注意力机制的公式表述如下，其中$\sigma_1(x)=max(0,x)$，$\sigma_2(x)=\frac{1}{1+e^{-x}}$。
 \begin{equation}
-    \beta = \theta_1(W_g^Tg+W_f^Tf+b_1)
-    \alpha = \theta_2(W^T\beta+b_2)
+    \beta = \sigma_1(W_g^Tg+W_f^Tf+b_1)
+\end{equation}
+\begin{equation}
+    \alpha = \sigma_2(W^T\beta+b_2)
 \end{equation}
 
 上采样的方式一般有四种：插值法，反卷积，反池化，超分辨率重建领域的亚像素卷积插值。双线性插值是目前在语义分割中用的比较多的一种插值方式，比如FCN中就是用的这种方法。在CNN上下文中，反卷积是卷积的逆过程，卷积用于提取空间信息，反卷积用于解析空间信息。在实现上，反卷积是卷积的转置，所以反卷积也叫做转置卷积。反池化是池化的逆过程，在池化过程中，记录下max-pooling在对应kernel中的坐标，在反池化过程中，将一个元素根据kernel进行放大，根据之前的坐标将元素填写进去，其他位置补0 。在下采样的时候记录max的位置，上采样的时候最大值的位置还原，其它位置填0。反池化是速度最快的上采样操作，计算量和参数也特别少，但是准确率一般。虽然理论上，由于反卷积具有更多的参数，所以反卷积可以更好的学习特征，但是有研究表明，如果参数配置不当，反卷积很容易出现输出feature map带有明显棋盘状的现象\cite{odena2016deconvolution}，双线性差值可以取得与反卷积相同甚至更好的效果。因此，我们选择参数少且容易取得较好效果的双线性差值法。
 
 
-在卷积之后一般会有一个批归一化操作(Batch Normalization)。
+在卷积之后，激活函数之前，一般会有一个批归一化操作\cite{ioffe2015batch}(Batch Normalization)。BN是一种非常优雅的重参数化的方法，它的存在类似于为网络中不同的层设置了不同的学习率。为神经网络输入的多个数据称为batch，BN以batch为单位，先将上一层网络的输出在通道上标准化为标准正态分布，再进行缩放与平移操作，可以将上一层的输出调整在一个较好的范围内，结果就是模型训练更加容易。
 
-本文中所有的激活函数都是ReLU函数，$\sigma(x)=max(0,x)$。ReLU函数是一种分段线性函数，把所有的负值都变为0，而正值不变，这种操作被成为单侧抑制。单侧抑制使得神经网络中的神经元也具有了稀疏激活性。我们认为对于某种地物可以对某个特殊的指标有响应，而对其他指标就反应一般。所以ReLU实现稀疏后的模型能够更好地挖掘相关特征，且ReLU由于非负区间的梯度为常数，因此不存在梯度消失问题，使得模型的收敛速度维持在一个稳定状态。
+\begin{equation}
+    BN(x) = \gamma\frac{x-\mu}{\sigma}+\beta
+\end{equation}
+
+本文中几乎所有的激活函数都是ReLU函数，$\sigma(x)=max(0,x)$。ReLU函数是一种分段线性函数，把所有的负值都变为0，而正值不变，这种操作被成为单侧抑制。单侧抑制使得神经网络中的神经元也具有了稀疏激活性。我们认为对于某种地物可以对某个特殊的指标有响应，而对其他指标就反应一般。所以ReLU实现稀疏后的模型能够更好地挖掘相关特征，且ReLU由于非负区间的梯度为常数，因此不存在梯度消失问题，使得模型的收敛速度维持在一个稳定状态。
 
 \begin{equation}
     ReLU(x)=\left\{
@@ -186,26 +202,32 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
     \right.
 \end{equation}
 
+在最后一层卷积层，激活函数会使用sigmoid函数，用于将输出映射到0-1之间，代表该像素点为云的概率。为了训练模型，使用交叉熵损失函数计算损失，并用带动量的随即梯度下降法进行训练。
+\begin{equation}
+    L = -\sum_{i=1}^N y_ilog(\hat{y}_i)+(1-y_i)log(1-\hat{y}_i)
+\end{equation}
+其中，$N$表示所有所有样本个数，$y_i$代表标签真值，$\hat{y_i}$代表模型预测值。
 
 \section[]{Experience and Result}
 
-为客观评定算法的有效性和优越性，采用准确率，召回率，精确度，$F_1$值对结果进行评估。其中，准确率衡量像素分类正确的概率；召回率衡量属于云的像素中被分类正确的概率；精确度衡量被识别为云的像素中真正是云的概率；$F_1$值是召回率与精确度的调和平均数，常被用于二分类问题，可以有效衡量样本不均衡时检测结果的好坏。四个评价指标分别为：
+为客观评定算法的有效性和优越性，采用准确率，召回率，精确度，$F_1$值对结果进行评估。其中，准确率衡量像素分类正确的概率；召回率衡量属于云的像素中被分类正确的概率，是漏警率的相反数；精确度衡量被识别为云的像素中真正是云的概率，是虚警率的相反数；$F_1$值是召回率与精确度的调和平均数，常被用于二分类问题，可以有效衡量样本不均衡时检测结果的好坏。四个评价指标分别为：
 
 \begin{equation}
-    R_{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}\label{acc}
+    A = \frac{TP + TN}{TP + TN + FP + FN}\label{acc}
 \end{equation}
 \begin{equation}
-    R_{recall} = \frac{TP}{TP + FN}\label{recall}
+    R = \frac{TP}{TP + FN}\label{recall}
 \end{equation}
 \begin{equation}
-    R_{precision} = \frac{TP}{TP + FP}\label{precision}
+    P = \frac{TP}{TP + FP}\label{precision}
 \end{equation}
 \begin{equation}
-    R_{f1-score} = \frac{2 * R_{recall} * R_{precision}}{R_{recall} + R_{precision}}\label{f1}
+    F = \frac{2 * R_{recall} * R_{precision}}{R_{recall} + R_{precision}}\label{f1}
 \end{equation}
+
 其中，TP为真正类（True Positive），即云被判为云；TN为真负类（True Negative），即非云被判为非云；FP为假正类（False Positive），即非云被判为云；FN为假负类（false Negative），云被判为非云。
 
-本文将模型与landsat自带的QA波段、原始的UNet做比较。相比于QA波段，取得了8个百分点的性能提升；相比于原始的UNet，效果十分接近，但是我们的模型参数仅不到UNet的十分之一，更加轻量，具有更大的应用潜力。更详细的评估结果如表(\ref{tab_eval})所示。
+本文将模型与landsat自带的QA波段、原始的UNet做比较。相比于QA波段，取得了8个百分点的性能提升；相比于原始的UNet，效果十分接近，但是我们的模型参数仅不到UNet的十分之一，更加轻量，具有更大的应用潜力。更详细的评估结果如表(\ref{tab_eval})所示。具体参数，如学习率为$1e^{-2}$，batch size 为 8，采用动量为0.9的随即梯度下降法训练，损失函数为交叉熵损失。所有实验均在MacBook Pro (15-inch, 2018)上进行，处理器为2.2 GHz Intel Core i7，内存16 GB 2400 MHz DDR4，Intel UHD Graphics 630 1536 MB。
 
 \begin{table}[H]
     \centering
@@ -216,10 +238,10 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
         model& evaluation& Barren& Forest& Grass/Crops& Shrubland& Snow/Ice& Urban& Water&  Wetlands& total\\
         \hline
         \multirow{4}*{our}
-        &acc   &94.92 &94.55 &94.20 &95.17 &93.96 &94.85 &94.14 &94.40 &94.56\\
-        &rec.  &94.19 &92.82 &88.84 &93.49 &90.77 &96.79 &90.29 &98.75 &93.81\\
-        &prec. &97.47 &99.44 &94.73 &97.21 &94.51 &91.80 &94.56 &91.94 &95.39\\
-        &F1    &95.80 &96.01 &91.69 &95.31 &92.60 &94.23 &92.37 &95.22 &94.60\\
+        &acc   &93.74 &95.60 &94.28 &94.45 &92.89 &92.96 &94.72 &93.55 &94.02\\
+        &rec.  &98.64 &94.26 &95.17 &96.59 &94.76 &98.63 &92.62 &99.29 & \textbf{96.24}\\
+        &prec. &91.79 &99.49 &89.59 &93.10 &88.88 &86.93 &93.86 &90.28 &91.74\\
+        &F1    &95.09 &96.80 &92.30 &94.81 &91.72 &92.41 &93.23 &94.57 &\textbf{93.87}\\
         \hline
         \multirow{4}*{QA}
         &acc   &87.46 &95.20 &85.42 &90.34 &60.97 &83.05 &91.51 &90.78 &86.09\\
@@ -228,10 +250,10 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
         &F1    &89.91 &96.51 &77.05 &90.92 &66.29 &83.13 &89.52 &92.21 &86.96\\
         \hline
         \multirow{4}*{U-Net}
-        &acc   &95.49 &95.73 &94.78 &95.91 &93.28 &94.56 &94.80 &94.30 &94.85\\
-        &rec.  &96.35 &94.48 &89.25 &95.35 &87.97 &96.59 &93.88 &98.86 &94.09\\
-        &prec. &96.32 &99.46 &95.97 &96.82 &95.52 &91.38 &92.94 &91.70 &95.01\\
-        &F1    &96.33 &96.91 &92.49 &96.08 &91.59 &93.91 &93.41 &95.15 &94.48\\
+        &acc   &96.09 &94.51 &92.67 &94.48 &91.78 &95.00 &93.74 &94.90 &\textbf{94.15}\\
+        &rec.  &96.00 &92.96 &81.91 &91.58 &89.16 &96.22 &89.83 &98.34 &92.00\\
+        &prec. &97.60 &99.22 &97.31 &97.77 &90.90 &92.56 &93.97 &93.05 &\textbf{95.30}\\
+        &F1    &96.80 &95.99 &88.95 &94.58 &90.02 &94.36 &91.85 &95.62 &93.52\\
         \hline
         \hline
     \end{tabular}}
@@ -239,42 +261,112 @@ Long提出FCN\cite{FCN}是CNN语义分割的开山之作，通过将普通CNN分
     \label{tab_eval}
 \end{table}
 
-在大部分情况下，我们的模型与U-Net相差无几。但仔细观察可以发现，我们的模型对于碎云、细节有良好的检测与保持能力。如图\ref{Fig.main}所示，(a)(b)(c)(d)分别为landsat真彩色图、人工标签、我们模型的云掩膜图、U-Net的云掩膜图，(e)(f)(g)(h)分别为放大之后的局部小图。我们的模型由于有直达通道的存在，对细节有较好的保持，对碎云有良好的识别；同时由于引入attention，也考虑到了图像的空间信息，能以极少的参数在整体上达到与U-Net相近的效果。
+在大部分情况下，我们的模型与U-Net相差无几。但仔细观察可以发现，我们的模型对于碎云、细节有良好的检测与保持能力，unet的识别更加光滑，使得一些细节被忽略，而我们的模型更加注重细节，这对于云检测是一个很重要的能力。如图\ref{Fig.main1}所示，从左到右依次为真彩色图、人工标注、我们的模型预测结果、UNet结果，第二行是第一行黄色方框的放大图，以此类推。我们的模型由于有直达通道的存在，对细节有较好的保持，对碎云有良好的识别；同时由于引入attention，也考虑到了图像的空间信息，能以极少的参数在整体上达到与U-Net相近的效果。
 
 \begin{figure}[H]
-    \centering  %图片全局居中
-
-    \subfigure[RGB]{
-    \label{Fig.sub.1}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_color.jpg}}
-    \subfigure[mask]{
-    \label{Fig.sub.2}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_mask.jpg}}
-    \subfigure[our]{
-    \label{Fig.sub.3}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_my.jpg}}
-    \subfigure[U-Net]{
-    \label{Fig.sub.4}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_unet.jpg}}
-    \subfigure[RGB]{
-    \label{Fig.sub.5}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_cut_color.jpg}}
-    \subfigure[mask]{
-    \label{Fig.sub.6}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_cut_mask.jpg}}
-    \subfigure[our]{
-    \label{Fig.sub.7}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_cut_my.jpg}}
-    \subfigure[U-Net]{
-    \label{Fig.sub.8}
-    \includegraphics[width=0.2\textwidth]{../log/tmp_cut_unet.jpg}}
-
-    \caption{Main name}
-    \label{Fig.main}
+    \centering
+    \subfigure[Color]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80150312014226LGN00_08297_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80150312014226LGN00_08297_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80650182013237LGN00_10854_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80650182013237LGN00_10854_color.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81620432014072LGN00_16101_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81620432014072LGN00_16101_color.jpg}
+        \end{minipage}
+    }
+    \subfigure[GT]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80150312014226LGN00_08297_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80150312014226LGN00_08297_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80650182013237LGN00_10854_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80650182013237LGN00_10854_mask.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81620432014072LGN00_16101_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81620432014072LGN00_16101_mask.jpg}
+        \end{minipage}
+    }
+    \subfigure[Ours]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80150312014226LGN00_08297_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80150312014226LGN00_08297_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80650182013237LGN00_10854_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80650182013237LGN00_10854_my.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81620432014072LGN00_16101_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81620432014072LGN00_16101_my.jpg}
+        \end{minipage}
+    }
+    \subfigure[unet]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80150312014226LGN00_08297_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80150312014226LGN00_08297_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80650182013237LGN00_10854_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80650182013237LGN00_10854_unet.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81620432014072LGN00_16101_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81620432014072LGN00_16101_unet.jpg}
+        \end{minipage}
+    }
+\caption{Example of prediction}
+\label{Fig.main1}
 \end{figure}
 
+我们的模型由于直达通道的存在，虽然模型参数比unet大大降低（我们的模型有763829个参数，而UNet有14096706），但更加注重单个像素的光谱特征，容易识别小尺寸的云，这在低分辨率的遥感图像中更加有用，因为低分辨率的碎云可能会更多。同时由于人工标注的不稳定性，简单地依靠评价指标可能并不能真实反应模型的优劣；并且以这些标签为真值进行的训练，可能也会存在问题。
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Color]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC809_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC809_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80980712014024LGN00_14882_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80980712014024LGN00_14882_color.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81570452014213LGN00_06157_color.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81570452014213LGN00_06157_color.jpg}
+        \end{minipage}
+    }
+    \subfigure[GT]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC809_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC809_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80980712014024LGN00_14882_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80980712014024LGN00_14882_mask.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81570452014213LGN00_06157_mask.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81570452014213LGN00_06157_mask.jpg}
+        \end{minipage}
+    }
+    \subfigure[Ours]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC809_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC809_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80980712014024LGN00_14882_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80980712014024LGN00_14882_my.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81570452014213LGN00_06157_my.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81570452014213LGN00_06157_my.jpg}
+        \end{minipage}
+    }
+    \subfigure[unet]{
+        \begin{minipage}[b]{0.15\linewidth}
+            \includegraphics[width=1\linewidth]{../log/cut/LC809_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC809_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC80980712014024LGN00_14882_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC80980712014024LGN00_14882_unet.jpg}
+            \vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/LC81570452014213LGN00_06157_unet.jpg}\vspace{4pt}
+            \includegraphics[width=1\linewidth]{../log/cut/tmp_cut_LC81570452014213LGN00_06157_unet.jpg}
+        \end{minipage}
+    }
+
+\caption{Example of bad GT}
+\label{Fig.main2}
+\end{figure}
 
 \section[]{Conclusion}
-云检测一直是遥感领域的研究热点与难点。本文提出了一种基于encoder-deconder结构改进的新的遥感图像云检测模型。该模型充分利用遥感图像多波段的特点，通过增加直达通道，并引入注意力机制，在保持边缘细节与扩大感受野之间寻找矛盾的解决方法，并在landsat8数据集上达到了94\%的准确率，基本还原了输入影像的细节信息。后续将继续优化直达通道与空间信息提取部分，并尝试深度学习与传统方法结合，以实现更加精确的遥感图像云检测。
+云检测一直是遥感领域的研究热点与难点。本文提出了一种基于encoder-deconder结构改进的新的遥感图像云检测模型。为了更好地保持边缘细节、增加对小的碎云的检测能力，这在云检测中非常重要，我们引入了直达通道，。直达通道全部是1*1的卷积核，它使得检测结果保持了“纯粹性”，没有收到其空间信息的干扰。并通过注意力机制，将空间信息与光谱信息完美地结合起来。该模型充分利用遥感图像多波段的特点，在保持边缘细节与扩大感受野之间寻找矛盾的解决方法，并在landsat8数据集上达到了94\%的准确率，基本还原了输入影像的细节信息。后续将继续优化直达通道与空间信息提取部分，并尝试深度学习与传统方法结合，以实现更加精确的遥感图像云检测。
 \bibliography{./ref.bib}
 \end{document}

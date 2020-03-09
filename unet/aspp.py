@@ -1,5 +1,3 @@
-# camera-ready
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,35 +6,35 @@ class ASPP(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(ASPP, self).__init__()
         
-        self.maxPool = nn.MaxPool2d(2)
-        mid_channels = int(out_channels / 4)
+        
+        mid_channels = int(out_channels / 2)
 
         self.conv_1x1_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=1)
         self.bn_conv_1x1_1 = nn.BatchNorm2d(mid_channels)
 
-        self.conv_3x3_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=6, dilation=6)
+        self.conv_3x3_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=2, dilation=2)
         self.bn_conv_3x3_1 = nn.BatchNorm2d(mid_channels)
 
-        self.conv_3x3_2 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=12, dilation=12)
+        self.conv_3x3_2 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=5, dilation=5)
         self.bn_conv_3x3_2 = nn.BatchNorm2d(mid_channels)
 
         self.conv_3x3_3 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=1, dilation=1)
         self.bn_conv_3x3_3 = nn.BatchNorm2d(mid_channels)
 
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        # self.avg_pool = nn.AdaptiveAvgPool2d(1)
 
-        self.conv_1x1_2 = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+        self.conv_1x1_2 = nn.Conv2d(mid_channels * 4, out_channels, kernel_size=1)
         self.bn_conv_1x1_2 = nn.BatchNorm2d(out_channels)
 
-        self.conv_1x1_3 = nn.Conv2d(5*out_channels, out_channels, kernel_size=1) # (1280 = 5*256)
-        self.bn_conv_1x1_3 = nn.BatchNorm2d(out_channels)
+        # self.conv_1x1_3 = nn.Conv2d(5*out_channels, out_channels, kernel_size=1) # (1280 = 5*256)
+        # self.bn_conv_1x1_3 = nn.BatchNorm2d(out_channels)
 
         # self.conv_1x1_4 = nn.Conv2d(out_channels, num_classes, kernel_size=1)
 
     def forward(self, feature_map):
         # (feature_map has shape (batch_size, 512, h/16, w/16)) (assuming self.resnet is ResNet18_OS16 or ResNet34_OS16. If self.resnet instead is ResNet18_OS8 or ResNet34_OS8, it will be (batch_size, 512, h/8, w/8))
 
-        feature_map = self.maxPool(feature_map)
+        # feature_map = self.maxPool(feature_map)
         feature_map_h = feature_map.size()[2] # (== h/16)
         feature_map_w = feature_map.size()[3] # (== w/16)
 
@@ -53,6 +51,34 @@ class ASPP(nn.Module):
         # out = F.relu(self.bn_conv_1x1_3(self.conv_1x1_3(out))) # (shape: (batch_size, 256, h/16, w/16))
         # out = self.conv_1x1_4(out) # (shape: (batch_size, num_classes, h/16, w/16))
         out = torch.cat([out_1x1, out_3x3_1, out_3x3_2, out_3x3_3], 1)
-        out = self.conv_1x1_2(out)
+        out = F.relu(self.bn_conv_1x1_2(self.conv_1x1_2(out)))
+        # out = self.conv_1x1_2(out)
         return out
 
+class DoubleAspp(nn.Module):
+    """(convolution => [BN] => ReLU) * 2"""
+
+    def __init__(self, in_channels, out_channels, kernelSize=3):
+        super().__init__()
+        self.double_aspp = nn.Sequential(
+            nn.MaxPool2d(2),
+            ASPP(in_channels, out_channels),
+            ASPP(out_channels, out_channels)
+        )
+
+    def forward(self, x):
+        return self.double_aspp(x)
+
+
+class SingleAspp(nn.Module):
+    """(convolution => [BN] => ReLU) * 2"""
+
+    def __init__(self, in_channels, out_channels, kernelSize=3):
+        super().__init__()
+        self.single_aspp = nn.Sequential(
+            nn.MaxPool2d(2),
+            ASPP(in_channels, out_channels)
+        )
+
+    def forward(self, x):
+        return self.single_aspp(x)

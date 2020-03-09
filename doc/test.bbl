@@ -43,6 +43,12 @@ Nicholas~R Goodwin, Lisa~J Collett, Robert~J Denham, Neil Flood, and Daniel
   automated method for landsat tm/etm+ time series.
 \newblock {\em Remote Sensing of Environment}, 134:50--65, 2013.
 
+\bibitem{ioffe2015batch}
+Sergey Ioffe and Christian Szegedy.
+\newblock Batch normalization: Accelerating deep network training by reducing
+  internal covariate shift.
+\newblock {\em arXiv preprint arXiv:1502.03167}, 2015.
+
 \bibitem{irish2006characterization}
 Richard~R Irish, John~L Barker, Samuel~N Goward, and Terry Arvidson.
 \newblock Characterization of the landsat-7 etm+ automated cloud-cover
@@ -69,6 +75,11 @@ Junchang Ju and David~P Roy.
 \newblock The availability of cloud-free landsat etm+ data over the
   conterminous united states and globally.
 \newblock {\em Remote Sensing of Environment}, 112(3):1196--1211, 2008.
+
+\bibitem{kirillov2019pointrend}
+Alexander Kirillov, Yuxin Wu, Kaiming He, and Ross Girshick.
+\newblock Pointrend: Image segmentation as rendering.
+\newblock {\em arXiv preprint arXiv:1912.08193}, 2019.
 
 \bibitem{li2018pyramid}
 Hanchao Li, Pengfei Xiong, Jie An, and Lingxue Wang.

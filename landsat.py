@@ -11,8 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from BagData import test_dataloader, train_dataloader
 
-from unet import UNet
-from unet import  UNetWithAttention
+from unet import UNet, UNetWithAttention, UNetWithAttAndAspp, conv1
 
 # %%
 def save_grad():
@@ -48,8 +47,9 @@ def train(epo_num=10):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
     net_pretrained = None
-    net_pretrained = torch.load("./checkpoints_attention/aspp_1.pt")
-    net = UNetWithAttention(n_channels=10, n_classes=2)
+    net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
+    net = UNetWithAttAndAspp(n_channels=10, n_classes=2)
+    modelName = 'single_aspp'
     # net = UNet(10, 2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
@@ -60,7 +60,8 @@ def train(epo_num=10):
     # criterion = nn.BCELoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
     # criterion = nn.BCEWithLogitsLoss().to(device)
-    optimizer = optim.SGD(net.parameters(), lr=1e-3, momentum=0.8)
+    # optimizer = optim.SGD(net.parameters(), lr=1e-2, momentum=0.9)
+    optimizer = optim.Adam(net.parameters(), lr=1e-4)
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -95,33 +96,33 @@ def train(epo_num=10):
             loss.backward()
             optimizer.step()
             iter_loss = loss.item()
-            writer.add_scalar('Loss/train_iter', iter_loss, global_step)
-            global_step += 1
-            # all_train_iter_loss.append(iter_loss)
+            # writer.add_scalar('Loss/train_iter', iter_loss, global_step)
+            # global_step += 1
+            # # all_train_iter_loss.append(iter_loss)
             train_loss += iter_loss
            
-            # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
-            # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
-            outputData = np.argmax(output.data, 1)
-            correction = (bag_msk * outputData).sum()
-            # print(correction, bag_msk.data.sum())
-            recall = correction.to(torch.float64) / bag_msk.data.sum()
-            precision = correction.to(torch.float64) / outputData.sum()
-            all_recall += recall
-            all_precision += precision
+            # # print(bag_msk.shape, output.shape, torch.argmax(output, dim=1).shape)
+            # # correction = np.sum(bag_msk * np.argmax(output.detach(), 1))
+            # outputData = np.argmax(output.data, 1)
+            # correction = (bag_msk * outputData).sum()
+            # # print(correction, bag_msk.data.sum())
+            # recall = correction.to(torch.float64) / bag_msk.data.sum()
+            # precision = correction.to(torch.float64) / outputData.sum()
+            # all_recall += recall
+            # all_precision += precision
 
             if np.mod(index, 2) == 0:
-                print('epoch {}, {:03d}/{},train loss is {:.4f}'.format(epo, index, len(train_dataloader), iter_loss), end="        ")
-                print('recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}'.format(
-                    recall, precision, 2*(recall*precision)/(recall+precision)))
+                print('epoch {}, {:03d}/{},train loss is {:.4f}'.format(epo, index, len(train_dataloader), iter_loss), end="\n        ")
+            #     print('recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}'.format(
+            #         recall, precision, 2*(recall*precision)/(recall+precision)))
 
         if np.mod(epo+1, 1) == 0:
             savePath = './checkpoints_attention/'
             if not os.path.exists(savePath):
                 os.makedirs(savePath)
 
-            torch.save(net, savePath + 'aspp_{}.pt'.format(epo+2))
-            print('saveing ' + savePath + 'aspp_{}.pt'.format(epo+3 ))
+            torch.save(net, savePath + modelName + '_{}.pt'.format(epo))
+            print('saveing ' + savePath + modelName + '_{}.pt'.format(epo))
             
         test_loss = 0
         all_recall_test = 0.
@@ -153,7 +154,7 @@ def train(epo_num=10):
 
                 if np.mod(index, 15) == 0:
                     print("loss: {:.4}".format(iter_loss), end="        ")
-                    print('acc: {:.4}, recall: {:.4}, precision: {:.4}, f-score: {:.4f}'.format(acc_test, 
+                    print('acc: {:.4}, recall: {:.4}, precision: {:.4}, f-score: {:.4f}'.format(acc_test/(index+1), 
                         recall_test, precision_test, 2*(recall_test*precision_test)/(recall_test+precision_test)))
                     pass
 
@@ -171,16 +172,16 @@ def train(epo_num=10):
         writer.add_scalar('Loss/train', train_loss, epo)
         writer.add_scalar('Loss/test', test_loss, epo)
         
-        rec, pre = all_recall/len(train_dataloader), all_precision/len(train_dataloader)
-        f1 = 2*rec*pre / (rec+pre)
-        print('epoch train recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
+        # rec, pre = all_recall/len(train_dataloader), all_precision/len(train_dataloader)
+        # f1 = 2*rec*pre / (rec+pre)
+        # print('epoch train recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
 
-        rec, pre = all_recall_test/len(test_dataloader), all_precision_test/len(test_dataloader)
-        f1 = 2*rec*pre / (rec+pre)
-        print('epoch test  recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
+        print('epoch test acc: {:.4}, recall: {:.4}, precision: {:.4}, f-score: {:.4f}'.format(acc_test/(index+1), 
+                        recall_test, precision_test, 2*(recall_test*precision_test)/(recall_test+precision_test)))
+        
         print('time: %s'%(time_str))
 
-        result.append([test_loss, rec, pre, f1])
+        result.append([test_loss, recall_test, precision_test])
         np.save('./log/train_loss.npy', result)
         np.save('./log/train_eval_{}.npy'.format(epo), evaluateArray)
     
@@ -190,7 +191,7 @@ def get_acc_recall_precision(arr, y, y_):
     arr[0] += y.sum()
     arr[1] += y_.sum()
     arr[2] += (y * y_).sum()
-    arr[3] += (y == y_).sum().to(torch.float64) / (256*256)
+    arr[3] += (y == y_).sum().to(torch.float64) / (256*256) / y.shape[0]
     recall = arr[2] / arr[0]
     precision = arr[2] / arr[1]
     return arr[3], recall, precision

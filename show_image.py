@@ -25,7 +25,7 @@ to_pil_image = transforms.ToPILImage()
 def test(modelPath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     unet = torch.load("./checkpoints_unet/unet_11.pt")
-    myModel = torch.load("./checkpoints_attention/unet_attention_2.pt")
+    myModel = torch.load("./checkpoints_attention/aspp_4.pt")
     total_params = sum(p.numel() for p in unet.parameters())
     print(total_params)
     total_params = sum(p.numel() for p in myModel.parameters())
@@ -41,7 +41,9 @@ def test(modelPath):
     
     for epo in range(1):
         for index, (names, bag, bag_msk, qa) in enumerate(test_dataloader):
-            print(names, senceDict[names[0].split('_')[0]])
+            print(names, senceList[senceDict[names[0].split('_')[0]]])
+            if senceList[senceDict[names[0].split('_')[0]]] != "Snow/Ice":
+                continue
             bag = bag.to(device)
             bag_msk = bag_msk.to(device).data
             qa = qa.to(device).data
@@ -57,7 +59,7 @@ def test(modelPath):
             u_out = u_outputData[0].float().numpy()
             m_out = m_outputData[0].float().numpy()
             mask = bag_msk[0].float().numpy()
-            color = np.transpose(bag[0, 1:4].numpy() * 5e-6, (1, 2, 0))
+            color = np.transpose(bag[0, 1:4].numpy() * 6e-6, (1, 2, 0))
             cv2.imshow('qa', qa)
             cv2.imshow('unet', u_out)
             cv2.imshow('my', m_out)
