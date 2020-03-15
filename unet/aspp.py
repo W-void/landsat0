@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .unet_parts import MedianPool2d
 
 class ASPP(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -76,7 +77,7 @@ class SingleAspp(nn.Module):
     def __init__(self, in_channels, out_channels, kernelSize=3):
         super().__init__()
         self.single_aspp = nn.Sequential(
-            nn.MaxPool2d(2),
+            MedianPool2d(2),
             ASPP(in_channels, out_channels)
         )
 

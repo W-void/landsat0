@@ -47,9 +47,9 @@ def train(epo_num=10):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = myModel(n_channel=10, n_class=2)
     net_pretrained = None
-    net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
+    # net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
     net = UNetWithAttAndAspp(n_channels=10, n_classes=2)
-    modelName = 'single_aspp'
+    modelName = 'asppWithMedianPool'
     # net = UNet(10, 2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
