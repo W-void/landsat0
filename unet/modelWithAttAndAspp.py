@@ -15,7 +15,7 @@ class UNetWithAttAndAspp(nn.Module):
         self.inc3 = DoubleConv(128, 128, 1)
         self.inc3 = DoubleConv(128, 64, 1)
         self.inc4 = DoubleConv(64, 32, 1)
-        self.down1 = MedianPoolDown(64, 128)
+        self.down1 = Down(64, 128)
         # self.down2 = Down(128, 128)
         # self.aspp = DoubleAspp(128,  128)
         self.aspp = SingleAspp(128,  128)

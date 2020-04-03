@@ -18,6 +18,8 @@ transform = transforms.Compose([
     , transforms.Normalize(
         mean=[0.04654*2, 0.04435*2, 0.04013*2, 0.04112*2, 0.04776*2, 0.02371*2, 0.01906*2, 0.0038*2, 0.1909*2, 0.17607*2], 
         std=[1370*16e-10, 1414*16e-10, 1385*16e-10, 1488*16e-10, 1522*16e-10, 998*16e-10, 821*16e-10, 292*16e-10, 2561*16e-10, 2119*16e-10]
+        # mean=[0.04435*2, 0.04013*2, 0.04112*2],
+        # std=[1414*16e-10, 1385*16e-10, 1488*16e-10]
         )
 ])
 
@@ -48,7 +50,7 @@ class BagDataset(Dataset):
 
     def readTif(self, fileName):
         im_data = gdal.Open(fileName).ReadAsArray()
-        return im_data
+        return im_data #[1:4]
 
     def __getitem__(self, idx):
         # img_name = '%05d'%idx
@@ -81,7 +83,7 @@ train_dataset = BagDataset(tr='train', transform=transform)
 test_dataset = BagDataset(tr='val', transform=transform)
 
 train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
-test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=8)
+test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=True, num_workers=8)
 # all_dataloader = DataLoader(bag, batch_size=4, shuffle=False, num_workers=4)
 
 if __name__ =='__main__':

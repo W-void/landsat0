@@ -14,7 +14,7 @@ def draw_rectangle(event,x,y,flags,param):
     #     cv2.rectangle(img, (ix, iy), (x, y), (0, 255, 0), 2)
 
 def plotRect(imgName):
-    names = ['color', 'mask', 'my', 'unet']
+    names = ['color', 'mask', 'spectral', 'my', 'unet']
     for name in names:
         img = cv2.imread(root+imgName+name+'.jpg')
         img1 = img.copy()
@@ -57,7 +57,7 @@ def plotRect(imgName):
 
 
 if __name__ == '__main__':
-    root = './log/'
+    root = './log/spoon2/'
     jpgs = [j[:-9] for j in os.listdir(root) if j[-9:] == 'color.jpg']
 
     for jpg in jpgs:

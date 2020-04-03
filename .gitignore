@@ -8,3 +8,5 @@
 *.gz
 VOC2012/
 log/events*
+checkpoints_unet/
+checkpoints_attention/

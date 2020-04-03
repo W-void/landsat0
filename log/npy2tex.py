@@ -1,6 +1,6 @@
 import numpy as np 
 
-arr = np.load('./predEvalArray.npy')
+arr = np.load('./log/predEvalArray.npy')
 arr = arr.T
 l = []
 l.append(arr[1]/arr[0]) #acc

@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from .unet_parts import MedianPool2d
 
 class ASPP(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, groups=1):
         super(ASPP, self).__init__()
         
         
@@ -13,13 +13,13 @@ class ASPP(nn.Module):
         self.conv_1x1_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=1)
         self.bn_conv_1x1_1 = nn.BatchNorm2d(mid_channels)
 
-        self.conv_3x3_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=2, dilation=2)
+        self.conv_3x3_1 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=2, dilation=2, groups=groups)
         self.bn_conv_3x3_1 = nn.BatchNorm2d(mid_channels)
 
-        self.conv_3x3_2 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=5, dilation=5)
+        self.conv_3x3_2 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=5, dilation=5, groups=groups)
         self.bn_conv_3x3_2 = nn.BatchNorm2d(mid_channels)
 
-        self.conv_3x3_3 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=1, dilation=1)
+        self.conv_3x3_3 = nn.Conv2d(in_channels, mid_channels, kernel_size=3, stride=1, padding=1, dilation=1, groups=groups)
         self.bn_conv_3x3_3 = nn.BatchNorm2d(mid_channels)
 
         # self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -27,7 +27,7 @@ class ASPP(nn.Module):
         self.conv_1x1_2 = nn.Conv2d(mid_channels * 4, out_channels, kernel_size=1)
         self.bn_conv_1x1_2 = nn.BatchNorm2d(out_channels)
 
-        # self.conv_1x1_3 = nn.Conv2d(5*out_channels, out_channels, kernel_size=1) # (1280 = 5*256)
+        # self.conv_1x1_3 = nn.Conv2d(5*mid_channels, out_channels, kernel_size=1) # (1280 = 5*256)
         # self.bn_conv_1x1_3 = nn.BatchNorm2d(out_channels)
 
         # self.conv_1x1_4 = nn.Conv2d(out_channels, num_classes, kernel_size=1)
@@ -77,7 +77,7 @@ class SingleAspp(nn.Module):
     def __init__(self, in_channels, out_channels, kernelSize=3):
         super().__init__()
         self.single_aspp = nn.Sequential(
-            MedianPool2d(2),
+            nn.MaxPool2d(2),
             ASPP(in_channels, out_channels)
         )
 

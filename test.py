@@ -8,7 +8,7 @@ import numpy as np
 from datetime import datetime
 import visdom
 import argparse
-
+from skimage import measure
 from BagData import test_dataloader
 
 # from unet import UNet
@@ -30,14 +30,21 @@ def read_list(path='./dataLoad/result.txt'):
 def test(modelPath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = torch.load("./checkpoints_unet/unet_1.pt")
-    net = torch.load("./checkpoints_attention/aspp_4.pt")
-    # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
+    # net = torch.load("./checkpoints_attention/aspp_4.pt")
+    net = torch.load("./checkpoints_attention/SpoonNet_5.pt")
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
     # print(net.state_dict().keys())
     net = net.to(device)
     net = net.float()
+
+    # net2 = torch.load("./checkpoints_unet/unet_1.pt")
+    # # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
+    # total_params = sum(p.numel() for p in net2.parameters())
+    # print(total_params)
+    # net2 = net2.to(device)
+    # net2 = net2.float()
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -47,6 +54,7 @@ def test(modelPath):
 
     senceDict = read_list()
     predEvalArray = np.zeros((8, 5))
+    unetEvalArray = np.zeros((8, 5))
     qaEvalArray = np.zeros((8, 5))
 
     roc = np.zeros((2, 100))
@@ -64,12 +72,20 @@ def test(modelPath):
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
             # qa = qa.to(device)
-            output = net(bag)
+            [output, spectral] = net(bag)
             outputData = np.argmax(output.data, 1)
+
+            # output2 = net2(bag)
+            # outputData2 = np.argmax(output2.data, 1)
            
+            regionSelect(bag_msk.data)
+            regionSelect(outputData)
+            # regionSelect(outputData2)
+            # regionSelect(qa.data)
+
             # acc, recall, precision = get_acc_recall_precision(evaluateArray, bag_msk.data, outputData)
-            expOut = np.exp(output.data)
-            get_roc(roc, bag_msk.data, expOut[:, 1]/torch.sum(expOut, 1))
+            # expOut = np.exp(output.data)
+            # get_roc(roc, bag_msk.data, expOut[:, 1]/torch.sum(expOut, 1))
             # a, r, p = get_acc_recall_precision(qaArray, bag_msk.data, qa.data)
 
             if index % 10 == 0:
@@ -77,16 +93,20 @@ def test(modelPath):
             #     print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(test_dataloader), acc/(index + 1)/bag.shape[0], recall, precision, 2*(recall*precision)/(recall+precision)))
             #     # print("qa_mask, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(a/(index + 1)/bag.shape[0], r, p, 2*(r*p)/(r+p)))
 
-            # for idx, name in enumerate(names):
-            #     senceId = re.split('[_]', name)[0]
-            #     out = output[idx]
-            #     y = bag_msk[idx].data
-            #     y_ = np.argmax(out.data, 0)
-            #     tmpList = evaluate(y, y_)
-            #     predEvalArray[senceDict[senceId]] += np.array(tmpList)
-                # qa_ = qa[idx].data
-                # tmpList = evaluate(y, qa_)
-                # qaEvalArray[senceDict[senceId]] += np.array(tmpList)
+            for idx, name in enumerate(names):
+                senceId = re.split('[_]', name)[0]
+                y = bag_msk.data[idx]
+                y_ = outputData[idx]
+                tmpList = evaluate(y, y_)
+                predEvalArray[senceDict[senceId]] += np.array(tmpList)
+
+                # y_ = outputData2[idx]
+                # tmpList = evaluate(y, y_)
+                # unetEvalArray[senceDict[senceId]] += np.array(tmpList)
+
+                qa_ = qa.data[idx]
+                tmpList = evaluate(y, qa_)
+                qaEvalArray[senceDict[senceId]] += np.array(tmpList)
 
         cur_time = datetime.now()
         h, remainder = divmod((cur_time - prev_time).seconds, 3600)
@@ -95,13 +115,29 @@ def test(modelPath):
         print('time: %s'%(time_str))
 
     # print(predEvalArray)
-    # np.save('./log/predEvalArray.npy', predEvalArray)
+    np.save('./log/spoonNetEvalArray_region.npy', predEvalArray)
+    # np.save('./log/unetEvalArray_region.npy', unetEvalArray)
     # np.save('./log/qaEvalArray.npy', qaEvalArray)
-    # showEvaluate(predEvalArray)
-    # showEvaluate(qaEvalArray)
-    np.save('./log/roc.npy', roc)
-    AUC = auc(roc[1, 1:]/ roc[1, 0], roc[0, 1:]/ roc[0, 0])
-    print('AUC : ', AUC)
+    showEvaluate(predEvalArray)
+    # showEvaluate(unetEvalArray)
+    showEvaluate(qaEvalArray)
+    # np.save('./log/roc.npy', roc)
+    # AUC = auc(roc[1, 1:]/ roc[1, 0], roc[0, 1:]/ roc[0, 0])
+    # print('AUC : ', AUC)
+
+
+def regionSelect(datas):
+    for i, data in enumerate(datas):
+        labels = measure.label(data, connectivity=2)  #8连通区域标记
+        #筛选连通区域大于100的
+        properties = measure.regionprops(labels)
+        valid_label = set()
+        for prop in properties:
+            if prop.area < 100:
+                valid_label.add(prop.label)
+        data = np.in1d(labels, list(valid_label)).reshape(labels.shape)
+        datas[i] = torch.from_numpy(data)
+
 
 def get_acc_recall_precision(arr, y, y_):
     arr[0] += y.sum()
@@ -112,6 +148,7 @@ def get_acc_recall_precision(arr, y, y_):
     precision = arr[2] / arr[1]
     return arr[3], recall, precision
 
+
 def evaluate(y, y_):
     correction = (y_ * y).sum()
     sumY_ = y_.sum()
@@ -120,11 +157,17 @@ def evaluate(y, y_):
     acc_ = sumEqual.to(torch.float64) / (256*256)
     return [1, acc_, correction, sumY, sumY_]
 
+
 def showEvaluate(arr):
     for i in range(8):
         acc, recall, precision = arr[i, 1] / arr[i, 0], arr[i, 2] / arr[i, 3], arr[i, 2] / arr[i, 4]
         f1 = 2 * recall * precision / (recall + precision)
         print('{0} : acc : {1}, recall : {2}, precision : {3}, f1 : {4}'.format(senceList[i], acc, recall, precision, f1))
+    arr = np.sum(arr, 0)
+    acc, recall, precision = arr[1] / arr[0], arr[2] / arr[3], arr[2] / arr[4]
+    f1 = 2 * recall * precision / (recall + precision)
+    print("total_f1: {}, total_recall: {}, total_precision: {}".format(f1, recall, precision))
+
 
 def get_roc(arr, mask, logit):
     mask, logit = mask.flatten(), logit.flatten()
