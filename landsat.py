@@ -53,9 +53,9 @@ def train(epo_num=10):
     # net = myModel(n_channel=10, n_class=2)
     net_pretrained = None
     # net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
-    net_pretrained = torch.load("./checkpoints_attention/SpoonNet_5.pt")
+    # net_pretrained = torch.load("./checkpoints_attention/SpoonNet_5.pt")
     net = SpoonNet2(n_channels=10, n_classes=2)
-    modelName = 'SpoonNet2'
+    modelName = 'SpoonNetSpretral4'
     # net = UNet(10, 2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
@@ -78,6 +78,12 @@ def train(epo_num=10):
     # start timing
     prev_time = datetime.now()
     for epo in range(epo_num):
+        if epo < 1:
+            weights = [0.8, 0.2]
+        elif epo < 2:
+            weights = [0.2, 0.8]
+        else:
+            weights = [0, 1]
         train_loss = 0
         all_recall = 0.
         all_precision = 0.
@@ -94,8 +100,8 @@ def train(epo_num=10):
             regularization_loss = 0
             # for param in net.parameters():
             #     regularization_loss += torch.sum(torch.abs(param))
-            # loss = 0.8 * criterion(output, bag_msk) + 0.2 * criterion(spectral, bag_msk)
-            loss = criterion(output, bag_msk)
+            loss = weights[0] * criterion(spectral, bag_msk) + weights[1] * criterion(output, bag_msk)
+            # loss = criterion(output, bag_msk)
             
             optimizer.zero_grad()
             # output.register_hook(print)
@@ -118,7 +124,7 @@ def train(epo_num=10):
             # all_recall += recall
             # all_precision += precision
 
-            if np.mod(index, 5) == 0:
+            if np.mod(index, 15) == 0:
                 print('epoch {}, {:03d}/{},train loss is {:.4f}'.format(epo, index, len(train_dataloader), iter_loss), end="\n        ")
             #     print('recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}'.format(
             #         recall, precision, 2*(recall*precision)/(recall+precision)))
@@ -177,7 +183,7 @@ def train(epo_num=10):
         time_str = "Time %02d:%02d:%02d" % (h, m, s)
         prev_time = cur_time
 
-        np.save('./log/spoonNetEvalArray_{}.npy'.format(epo), predEvalArray)
+        np.save('./log/' + modelName + '_{}.npy'.format(epo), predEvalArray)
         showEvaluate(predEvalArray)
 
         # train_loss = train_loss / len(train_dataloader)
