@@ -38,7 +38,7 @@ def test(modelPath):
     # myModel.eval()
 
     # spoonnet = torch.load("./checkpoints_attention/SpoonNet_5.pt")
-    spoonnet = torch.load("./checkpoints_attention/SpoonNet_5.pt")
+    spoonnet = torch.load("./checkpoints_attention/SpoonNetSpretral3_9.pt", map_location=torch.device('cpu'))
     total_params = sum(p.numel() for p in spoonnet.parameters())
     print(total_params)
     spoonnet = spoonnet.to(device).float()
@@ -57,7 +57,7 @@ def test(modelPath):
             u_output = unet(bag)
             u_outputData = np.argmax(u_output.data, 1)
             [m_output, spectral] = spoonnet(bag)
-            spectral = spectral.detach().numpy()
+            spectral = spectral[:, 0:3].detach().numpy()
             m_outputData = np.argmax(m_output.data, 1)
             eval(bag_msk, qa)
             eval(bag_msk, u_outputData)

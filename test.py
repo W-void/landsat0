@@ -31,7 +31,7 @@ def test(modelPath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = torch.load("./checkpoints_unet/unet_1.pt")
     # net = torch.load("./checkpoints_attention/aspp_4.pt")
-    net = torch.load("./checkpoints_attention/SpoonNet_5.pt")
+    net = torch.load("./checkpoints_attention/SpoonNetSpretral3_12.pt", map_location=torch.device('cpu'))
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
     # net = UNet(n_channels=10, n_classes=2)
@@ -39,12 +39,12 @@ def test(modelPath):
     net = net.to(device)
     net = net.float()
 
-    # net2 = torch.load("./checkpoints_unet/unet_1.pt")
-    # # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
-    # total_params = sum(p.numel() for p in net2.parameters())
-    # print(total_params)
-    # net2 = net2.to(device)
-    # net2 = net2.float()
+    net2 = torch.load("./checkpoints_unet/unet_1.pt")
+    # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
+    total_params = sum(p.numel() for p in net2.parameters())
+    print(total_params)
+    net2 = net2.to(device)
+    net2 = net2.float()
 
     all_train_iter_loss = []
     all_test_iter_loss = []
@@ -75,13 +75,13 @@ def test(modelPath):
             [output, spectral] = net(bag)
             outputData = np.argmax(output.data, 1)
 
-            # output2 = net2(bag)
-            # outputData2 = np.argmax(output2.data, 1)
+            output2 = net2(bag)
+            outputData2 = np.argmax(output2.data, 1)
            
             regionSelect(bag_msk.data)
             regionSelect(outputData)
-            # regionSelect(outputData2)
-            # regionSelect(qa.data)
+            regionSelect(outputData2)
+            regionSelect(qa.data)
 
             # acc, recall, precision = get_acc_recall_precision(evaluateArray, bag_msk.data, outputData)
             # expOut = np.exp(output.data)
@@ -100,9 +100,9 @@ def test(modelPath):
                 tmpList = evaluate(y, y_)
                 predEvalArray[senceDict[senceId]] += np.array(tmpList)
 
-                # y_ = outputData2[idx]
-                # tmpList = evaluate(y, y_)
-                # unetEvalArray[senceDict[senceId]] += np.array(tmpList)
+                y_ = outputData2[idx]
+                tmpList = evaluate(y, y_)
+                unetEvalArray[senceDict[senceId]] += np.array(tmpList)
 
                 qa_ = qa.data[idx]
                 tmpList = evaluate(y, qa_)
@@ -116,10 +116,10 @@ def test(modelPath):
 
     # print(predEvalArray)
     np.save('./log/spoonNetEvalArray_region.npy', predEvalArray)
-    # np.save('./log/unetEvalArray_region.npy', unetEvalArray)
-    # np.save('./log/qaEvalArray.npy', qaEvalArray)
+    np.save('./log/unetEvalArray_region.npy', unetEvalArray)
+    np.save('./log/qaEvalArray.npy', qaEvalArray)
     showEvaluate(predEvalArray)
-    # showEvaluate(unetEvalArray)
+    showEvaluate(unetEvalArray)
     showEvaluate(qaEvalArray)
     # np.save('./log/roc.npy', roc)
     # AUC = auc(roc[1, 1:]/ roc[1, 0], roc[0, 1:]/ roc[0, 0])
@@ -133,7 +133,7 @@ def regionSelect(datas):
         properties = measure.regionprops(labels)
         valid_label = set()
         for prop in properties:
-            if prop.area < 100:
+            if prop.area < 30:
                 valid_label.add(prop.label)
         data = np.in1d(labels, list(valid_label)).reshape(labels.shape)
         datas[i] = torch.from_numpy(data)
@@ -166,7 +166,7 @@ def showEvaluate(arr):
     arr = np.sum(arr, 0)
     acc, recall, precision = arr[1] / arr[0], arr[2] / arr[3], arr[2] / arr[4]
     f1 = 2 * recall * precision / (recall + precision)
-    print("total_f1: {}, total_recall: {}, total_precision: {}".format(f1, recall, precision))
+    print("total_acc: {}, total_f1: {}, total_recall: {}, total_precision: {}".format(acc, f1, recall, precision))
 
 
 def get_roc(arr, mask, logit):

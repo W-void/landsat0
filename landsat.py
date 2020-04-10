@@ -54,7 +54,7 @@ def train(epo_num=10):
     net_pretrained = None
     # net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
     # net_pretrained = torch.load("./checkpoints_attention/SpoonNet_5.pt")
-    net = SpoonNet2(n_channels=10, n_classes=2)
+    net = SpoonNet2(n_channels=10, n_classes=2, n_spectral=3)
     modelName = 'SpoonNetSpretral4'
     # net = UNet(10, 2)
     total_params = sum(p.numel() for p in net.parameters())

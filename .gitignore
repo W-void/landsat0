@@ -10,3 +10,4 @@ VOC2012/
 log/events*
 checkpoints_unet/
 checkpoints_attention/
+!checkpoints_attention/SpoonNetSpretral*.pt
