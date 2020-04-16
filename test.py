@@ -72,7 +72,7 @@ def test(modelPath):
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
             # qa = qa.to(device)
-            [output, spectral] = net(bag)
+            [output, spectral, _] = net(bag)
             outputData = np.argmax(output.data, 1)
 
             output2 = net2(bag)
@@ -117,7 +117,7 @@ def test(modelPath):
     # print(predEvalArray)
     np.save('./log/spoonNetEvalArray_region.npy', predEvalArray)
     np.save('./log/unetEvalArray_region.npy', unetEvalArray)
-    np.save('./log/qaEvalArray.npy', qaEvalArray)
+    np.save('./log/qaEvalArray_region.npy', qaEvalArray)
     showEvaluate(predEvalArray)
     showEvaluate(unetEvalArray)
     showEvaluate(qaEvalArray)
@@ -128,8 +128,8 @@ def test(modelPath):
 
 def regionSelect(datas):
     for i, data in enumerate(datas):
-        labels = measure.label(data, connectivity=2)  #8连通区域标记
-        #筛选连通区域大于100的
+        labels = measure.label(data, connectivity=1)  #8连通区域标记
+        #筛选连通区域大于30的
         properties = measure.regionprops(labels)
         valid_label = set()
         for prop in properties:

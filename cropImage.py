@@ -56,8 +56,9 @@ def write_images(bands, path):
 
 
 def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
-    sences = os.listdir(root)
-    sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
+    # sences = os.listdir(root)
+    # sences = [i for i in sences if len(i) == len('LC80060102014147LGN00')]
+    sences = ['LC80460282014171LGN00']
     # sences = ['LC82171112014297LGN00', 'LC81080182014238LGN00']
     valid_ext = ['.tif', '.TIF']
     num = 0
@@ -155,3 +156,4 @@ def crop_img(root='../../Data/BC/', window_size=256, crop_method='random'):
 # %%
 if __name__ == "__main__":
     crop_img(root='../BC/BC/', crop_method='uniform')
+    # crop_img(root='/Users/wangshuli/Downloads/BC/', window_size=512, crop_method='uniform')

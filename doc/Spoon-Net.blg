@@ -3,44 +3,44 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: Spoon-Net.aux
 The style file: unsrt.bst
 Database file #1: ./ref.bib
-You've used 19 entries,
+You've used 18 entries,
             1791 wiz_defined-function locations,
-            569 strings with 7776 characters,
-and the built_in function-call counts, 4948 in all, are:
-= -- 434
-> -- 266
+            563 strings with 7648 characters,
+and the built_in function-call counts, 4753 in all, are:
+= -- 419
+> -- 255
 < -- 1
-+ -- 95
-- -- 76
-* -- 403
-:= -- 804
-add.period$ -- 56
-call.type$ -- 19
-change.case$ -- 19
++ -- 91
+- -- 73
+* -- 387
+:= -- 770
+add.period$ -- 53
+call.type$ -- 18
+change.case$ -- 18
 chr.to.int$ -- 0
-cite$ -- 19
-duplicate$ -- 180
-empty$ -- 449
-format.name$ -- 76
-if$ -- 1056
+cite$ -- 18
+duplicate$ -- 171
+empty$ -- 430
+format.name$ -- 73
+if$ -- 1014
 int.to.chr$ -- 0
-int.to.str$ -- 19
-missing$ -- 18
-newline$ -- 97
-num.names$ -- 19
-pop$ -- 32
+int.to.str$ -- 18
+missing$ -- 17
+newline$ -- 92
+num.names$ -- 18
+pop$ -- 31
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 77
+skip$ -- 74
 stack$ -- 0
-substring$ -- 420
-swap$ -- 31
+substring$ -- 414
+swap$ -- 30
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
-while$ -- 52
-width$ -- 21
-write$ -- 207
+while$ -- 50
+width$ -- 20
+write$ -- 196

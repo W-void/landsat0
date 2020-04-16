@@ -38,7 +38,8 @@ def test(modelPath):
     # myModel.eval()
 
     # spoonnet = torch.load("./checkpoints_attention/SpoonNet_5.pt")
-    spoonnet = torch.load("./checkpoints_attention/SpoonNetSpretral3_9.pt", map_location=torch.device('cpu'))
+    spoonnet = torch.load("./checkpoints_attention/SpoonNetSpretral3_12.pt", map_location=torch.device('cpu'))
+    savePath = './log/spoon3/'
     total_params = sum(p.numel() for p in spoonnet.parameters())
     print(total_params)
     spoonnet = spoonnet.to(device).float()
@@ -56,8 +57,9 @@ def test(modelPath):
             qa = qa.to(device).data
             u_output = unet(bag)
             u_outputData = np.argmax(u_output.data, 1)
-            [m_output, spectral] = spoonnet(bag)
+            [m_output, spectral, spatial] = spoonnet(bag)
             spectral = spectral[:, 0:3].detach().numpy()
+            spatial = spatial[:, 0:3].detach().numpy()
             m_outputData = np.argmax(m_output.data, 1)
             eval(bag_msk, qa)
             eval(bag_msk, u_outputData)
@@ -69,6 +71,8 @@ def test(modelPath):
 
             for i in range(len(names)):
                 s = spectral[i]
+                for j in range(3):
+                    s[j] = (s[j] -  s[j].min())/  (s[j].max() - s[j].min())
                 q = qa[i].float().numpy()
                 u_out = u_outputData[i].float().numpy()
                 m_out = m_outputData[i].float().numpy()
@@ -81,18 +85,24 @@ def test(modelPath):
                 cv2.imshow('my', m_out)
                 cv2.imshow('mask', mask)
                 cv2.imshow("color", color)
-                cv2.imshow('spectral', np.transpose(s/s.max(), (1, 2, 0)))
+                cv2.imshow('spectral', np.transpose(s, (1, 2, 0)))
+                sp = spatial[i]
+                for j in range(3):
+                    sp[j] = (sp[j] -  sp[j].min())/  (sp[j].max() - sp[j].min())
+                cv2.imshow('spatial', np.transpose(sp, (1, 2, 0)))
                 k = cv2.waitKey(0)
                 if k == ord('s'):
                     imgName = names[i][:-5]
-                    cv2.imwrite('./log/spoon2/'+imgName+'_color.jpg', color*255)
-                    cv2.imwrite('./log/spoon2/'+imgName+'_qa.jpg', q*255)
-                    cv2.imwrite('./log/spoon2/'+imgName+'_my.jpg', m_out*255)
+                    cv2.imwrite(savePath+imgName+'_color.jpg', color*255)
+                    cv2.imwrite(savePath+imgName+'_qa.jpg', q*255)
+                    cv2.imwrite(savePath+imgName+'_my.jpg', m_out*255)
                     # cv2.imwrite('./log/spoon2/'+imgName+'_sout.jpg', s_out*255)
-                    cv2.imwrite('./log/spoon2/'+imgName+'_unet.jpg', u_out*255)
-                    cv2.imwrite('./log/spoon2/'+imgName+'_mask.jpg', mask*255)
-                    s = s/s.max()*255
-                    cv2.imwrite('./log/spoon2/'+imgName+'_spectral.jpg', np.transpose(s.astype(np.uint8), (1, 2, 0)))
+                    cv2.imwrite(savePath+imgName+'_unet.jpg', u_out*255)
+                    cv2.imwrite(savePath+imgName+'_mask.jpg', mask*255)
+                    s = s*255
+                    cv2.imwrite(savePath+imgName+'_spectral.jpg', np.transpose(s.astype(np.uint8), (1, 2, 0)))
+                    sp = sp*255
+                    cv2.imwrite(savePath+imgName+'_spatial.jpg', np.transpose(sp.astype(np.uint8), (1, 2, 0)))
                     print("saved!")
                 cv2.destroyAllWindows()
             # img = to_pil_image(bag[0, 1:4] * 2e-5)
