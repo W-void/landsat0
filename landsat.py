@@ -11,7 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 from focal_loss import FocalLoss
 from BagData import test_dataloader, train_dataloader
 from test import evaluate, showEvaluate, read_list
-from unet import UNet, UNetWithAttention, UNetWithAttAndAspp, conv1, UNetWithGroupConv, SpoonNet, rendNet, SpoonNet2
+from unet import UNet, UNetWithAttention, UNetWithAttAndAspp, conv1, UNetWithGroupConv, SpoonNet, rendNet, SpoonNet2, SegNet
+from log.npy2tex import npy2tex
 
 # %%
 def save_grad():
@@ -54,8 +55,9 @@ def train(epo_num=10):
     net_pretrained = None
     # net_pretrained = torch.load("./checkpoints_attention/aspp_4.pt")
     # net_pretrained = torch.load("./checkpoints_attention/SpoonNet_5.pt")
-    net = SpoonNet2(n_channels=10, n_classes=2, n_spectral=3)
-    modelName = 'SpoonNetSpretral4'
+    # net = SpoonNet2(n_channels=10, n_classes=2, n_spectral=3)
+    net = SegNet()
+    modelName = 'SegNet'
     # net = UNet(10, 2)
     total_params = sum(p.numel() for p in net.parameters())
     print(total_params)
@@ -95,13 +97,13 @@ def train(epo_num=10):
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
 
-            [output, spectral] = net(bag)
-            # output = net(bag)
+            # [output, spectral] = net(bag)
+            output = net(bag)
             regularization_loss = 0
             # for param in net.parameters():
             #     regularization_loss += torch.sum(torch.abs(param))
-            loss = weights[0] * criterion(spectral, bag_msk) + weights[1] * criterion(output, bag_msk)
-            # loss = criterion(output, bag_msk)
+            # loss = weights[0] * criterion(spectral, bag_msk) + weights[1] * criterion(output, bag_msk)
+            loss = criterion(output, bag_msk)
             
             optimizer.zero_grad()
             # output.register_hook(print)
@@ -142,7 +144,7 @@ def train(epo_num=10):
         all_precision_test = 0.
         evaluateArray = np.zeros((4))
         senceDict = read_list()
-        predEvalArray = np.zeros((8, 5))
+        predEvalArray = np.zeros((9, 5))
         net.eval()
         with torch.no_grad():
             for index, (names, bag, bag_msk, _) in enumerate(test_dataloader):
@@ -151,8 +153,9 @@ def train(epo_num=10):
                 bag_msk = bag_msk.to(device)
 
                 optimizer.zero_grad()
-                [output, spectral] = net(bag)
-
+                # [output, spectral] = net(bag)
+                output = net(bag)
+                
                 # loss = criterion(output, bag_msk)
                 # iter_loss = loss.item()
                 # # all_test_iter_loss.append(iter_loss)
@@ -183,28 +186,16 @@ def train(epo_num=10):
         time_str = "Time %02d:%02d:%02d" % (h, m, s)
         prev_time = cur_time
 
+        predEvalArray[8] = np.array([index+1, acc_test, recall_test, precision_test, 2*(recall_test*precision_test)/(recall_test+precision_test)])
         np.save('./log/' + modelName + '_{}.npy'.format(epo), predEvalArray)
-        showEvaluate(predEvalArray)
-
-        # train_loss = train_loss / len(train_dataloader)
-        # test_loss = test_loss / len(test_dataloader)
-        # print('epoch train loss = %f, epoch test loss = %f, %s'
-        #         %(train_loss, test_loss, time_str))
-        # writer.add_scalar('Loss/train', train_loss, epo)
-        # writer.add_scalar('Loss/test', test_loss, epo)
-        
-        # rec, pre = all_recall/len(train_dataloader), all_precision/len(train_dataloader)
-        # f1 = 2*rec*pre / (rec+pre)
-        # print('epoch train recall, precision, f-score = %.4f, %.4f, %.4f' %(rec, pre, f1))
+        # showEvaluate(predEvalArray)
+        npy2tex(predEvalArray)
 
         print('epoch test acc: {:.4}, recall: {:.4}, precision: {:.4}, f-score: {:.4f}'.format(acc_test/(index+1), 
                         recall_test, precision_test, 2*(recall_test*precision_test)/(recall_test+precision_test)))
         
         print('time: %s'%(time_str))
 
-        # result.append([test_loss, recall_test, precision_test])
-        # np.save('./log/train_loss.npy', result)
-        np.save('./log/train_eval_{}.npy'.format(epo), evaluateArray)
     
     writer.close()
     

@@ -10,7 +10,7 @@ import visdom
 import argparse
 from skimage import measure
 from BagData import test_dataloader
-
+from log.npy2tex import npy2tex
 # from unet import UNet
 
 from sklearn.metrics import roc_curve, auc
@@ -31,30 +31,39 @@ def test(modelPath):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # net = torch.load("./checkpoints_unet/unet_1.pt")
     # net = torch.load("./checkpoints_attention/aspp_4.pt")
-    net = torch.load("./checkpoints_attention/SpoonNetSpretral3_12.pt", map_location=torch.device('cpu'))
-    total_params = sum(p.numel() for p in net.parameters())
-    print(total_params)
-    # net = UNet(n_channels=10, n_classes=2)
-    # print(net.state_dict().keys())
-    net = net.to(device)
-    net = net.float()
+    # net = torch.load("./checkpoints_attention/SpoonNetSpretral3_12.pt", map_location=torch.device('cpu'))
+    # total_params = sum(p.numel() for p in net.parameters())
+    # print(total_params)
+    # # net = UNet(n_channels=10, n_classes=2)
+    # # print(net.state_dict().keys())
+    # net = net.to(device)
+    # net = net.float()
+    # net.eval()
 
     net2 = torch.load("./checkpoints_unet/unet_1.pt")
-    # net = torch.load("./checkpoints_attention/unet_attention_2.pt")
     total_params = sum(p.numel() for p in net2.parameters())
     print(total_params)
     net2 = net2.to(device)
     net2 = net2.float()
+    net2.eval()
+
+    net3 = torch.load("./checkpoints_attention/SegNet_2.pt")
+    total_params = sum(p.numel() for p in net3.parameters())
+    print(total_params)
+    net3 = net3.to(device)
+    net3 = net3.float()
+    net3.eval()
 
     all_train_iter_loss = []
     all_test_iter_loss = []
-    net.eval()
+    
     # start timing
     prev_time = datetime.now()
 
     senceDict = read_list()
     predEvalArray = np.zeros((8, 5))
     unetEvalArray = np.zeros((8, 5))
+    segEvalArray = np.zeros((8, 5))
     qaEvalArray = np.zeros((8, 5))
 
     roc = np.zeros((2, 100))
@@ -72,41 +81,42 @@ def test(modelPath):
             bag = bag.to(device)
             bag_msk = bag_msk.to(device)
             # qa = qa.to(device)
-            [output, spectral, _] = net(bag)
-            outputData = np.argmax(output.data, 1)
+            # [output, spectral, _] = net(bag)
+            # outputData = np.argmax(output.data, 1)
 
             output2 = net2(bag)
             outputData2 = np.argmax(output2.data, 1)
+
+            output3 = net3(bag)
+            outputData3 = np.argmax(output3.data, 1)
            
             regionSelect(bag_msk.data)
-            regionSelect(outputData)
+            # regionSelect(outputData)
             regionSelect(outputData2)
-            regionSelect(qa.data)
-
-            # acc, recall, precision = get_acc_recall_precision(evaluateArray, bag_msk.data, outputData)
-            # expOut = np.exp(output.data)
-            # get_roc(roc, bag_msk.data, expOut[:, 1]/torch.sum(expOut, 1))
-            # a, r, p = get_acc_recall_precision(qaArray, bag_msk.data, qa.data)
+            regionSelect(outputData3)
+            # regionSelect(qa.data)
 
             if index % 10 == 0:
                 print(index)
-            #     print("{:03d}/{}, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(index, len(test_dataloader), acc/(index + 1)/bag.shape[0], recall, precision, 2*(recall*precision)/(recall+precision)))
-            #     # print("qa_mask, acc : {:.4f}, recall: {:.4f}, precision: {:.4f}, f-score: {:.4f}".format(a/(index + 1)/bag.shape[0], r, p, 2*(r*p)/(r+p)))
 
             for idx, name in enumerate(names):
                 senceId = re.split('[_]', name)[0]
                 y = bag_msk.data[idx]
-                y_ = outputData[idx]
-                tmpList = evaluate(y, y_)
-                predEvalArray[senceDict[senceId]] += np.array(tmpList)
+                # y_ = outputData[idx]
+                # tmpList = evaluate(y, y_)
+                # predEvalArray[senceDict[senceId]] += np.array(tmpList)
 
                 y_ = outputData2[idx]
                 tmpList = evaluate(y, y_)
                 unetEvalArray[senceDict[senceId]] += np.array(tmpList)
 
-                qa_ = qa.data[idx]
-                tmpList = evaluate(y, qa_)
-                qaEvalArray[senceDict[senceId]] += np.array(tmpList)
+                y_ = outputData3[idx]
+                tmpList = evaluate(y, y_)
+                segEvalArray[senceDict[senceId]] += np.array(tmpList)
+
+                # qa_ = qa.data[idx]
+                # tmpList = evaluate(y, qa_)
+                # qaEvalArray[senceDict[senceId]] += np.array(tmpList)
 
         cur_time = datetime.now()
         h, remainder = divmod((cur_time - prev_time).seconds, 3600)
@@ -115,12 +125,16 @@ def test(modelPath):
         print('time: %s'%(time_str))
 
     # print(predEvalArray)
-    np.save('./log/spoonNetEvalArray_region.npy', predEvalArray)
+    # np.save('./log/spoonNetEvalArray_region.npy', predEvalArray)
     np.save('./log/unetEvalArray_region.npy', unetEvalArray)
-    np.save('./log/qaEvalArray_region.npy', qaEvalArray)
-    showEvaluate(predEvalArray)
-    showEvaluate(unetEvalArray)
-    showEvaluate(qaEvalArray)
+    np.save('./log/segEvalArray_region.npy', segEvalArray)
+    # np.save('./log/qaEvalArray_region.npy', qaEvalArray)
+    # showEvaluate(predEvalArray)
+    # showEvaluate(unetEvalArray)
+    # showEvaluate(segEvalArray)
+    npy2tex(unetEvalArray)
+    npy2tex(segEvalArray)
+    # showEvaluate(qaEvalArray)
     # np.save('./log/roc.npy', roc)
     # AUC = auc(roc[1, 1:]/ roc[1, 0], roc[0, 1:]/ roc[0, 0])
     # print('AUC : ', AUC)
