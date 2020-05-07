@@ -29,4 +29,3 @@ https://landsat.usgs.gov/cloud-validation/cca_l8/LC80980712014024LGN00.tar.gz
 https://landsat.usgs.gov/cloud-validation/cca_l8/LC81750512013208LGN00.tar.gz
 https://landsat.usgs.gov/cloud-validation/cca_l8/LC81620432014072LGN00.tar.gz
 https://landsat.usgs.gov/cloud-validation/cca_l8/LC80290372013257LGN00.tar.gz
-]
